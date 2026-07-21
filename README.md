@@ -11,7 +11,7 @@ computation runs **client-side**, so the site is fast, private and cheap to host
 
 ## ✨ Features
 
-- 10 production-ready tools (6 calculators, 3 converters, 1 generator).
+- 34 production-ready tools across calculators, converters and generators (incl. Retirement, Investment, US Income Tax by state, Calorie, Pregnancy, Scientific, Date/Time, Currency, Markdown↔HTML, Base64, URL, Color, Timestamp, QR Code, Lorem Ipsum, UUID, Invoice PDF, Random Name/Number, Text Case, Word/Character Counter, Slug).
 - 100% static output → deploys to any CDN/static host.
 - Strong Core Web Vitals: zero JS by default, per-page code splitting (Astro Islands).
 - Full technical SEO: canonical URLs, Open Graph, JSON-LD (`SoftwareApplication`,

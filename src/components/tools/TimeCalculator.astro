@@ -1,0 +1,63 @@
+<form id="time-form" class="tool-form" novalidate>
+  <h3 class="sub">Add / subtract time</h3>
+  <div class="field"><label for="time-start">Start time (hh:mm:ss)</label><input id="time-start" class="input" type="text" value="09:00:00" /></div>
+  <div class="input-row">
+    <div class="field"><label for="time-dh">Hours</label><input id="time-dh" class="input" type="number" step="1" value="2" /></div>
+    <div class="field"><label for="time-dm">Minutes</label><input id="time-dm" class="input" type="number" step="1" value="30" /></div>
+    <div class="field"><label for="time-ds">Seconds</label><input id="time-ds" class="input" type="number" step="1" value="0" /></div>
+  </div>
+  <div class="field"><label for="time-op">Operation</label>
+    <select id="time-op" class="select"><option value="+">Add (+)</option><option value="-">Subtract (−)</option></select>
+  </div>
+  <p id="time-combine" class="result-line"></p>
+
+  <hr class="sep" />
+
+  <h3 class="sub">Duration between two times</h3>
+  <div class="input-row">
+    <div class="field"><label for="time-t1">Time 1</label><input id="time-t1" class="input" type="text" value="09:00:00" /></div>
+    <div class="field"><label for="time-t2">Time 2</label><input id="time-t2" class="input" type="text" value="17:30:00" /></div>
+  </div>
+  <p id="time-dur" class="result-line"></p>
+</form>
+
+<script>
+  import { combineTime, durationBetween, parseTime, formatTime } from '../../core/time';
+  import { $ } from '../../lib/dom';
+
+  const form = $('time-form');
+
+  function compute() {
+    const combineEl = $('time-combine');
+    const durEl = $('time-dur');
+    const start = parseTime($('time-start')?.value ?? '');
+    const dh = parseInt($('time-dh')?.value ?? '0', 10) || 0;
+    const dm = parseInt($('time-dm')?.value ?? '0', 10) || 0;
+    const ds = parseInt($('time-ds')?.value ?? '0', 10) || 0;
+    const op = ($('time-op')?.value ?? '+') as '+' | '-';
+    if (start) {
+      const res = combineTime(start, { h: dh, m: dm, s: ds }, op);
+      if (combineEl) combineEl.textContent = `${formatTime(start)} ${op} ${formatTime({ h: dh, m: dm, s: ds })} = ${formatTime(res)}`;
+    } else if (combineEl) {
+      combineEl.textContent = 'Enter a valid start time (hh:mm:ss).';
+    }
+
+    const t1 = parseTime($('time-t1')?.value ?? '');
+    const t2 = parseTime($('time-t2')?.value ?? '');
+    if (t1 && t2) {
+      const dur = durationBetween(t1, t2);
+      if (durEl) durEl.textContent = `Duration = ${formatTime(dur)}`;
+    } else if (durEl) {
+      durEl.textContent = 'Enter valid times (hh:mm:ss).';
+    }
+  }
+
+  form?.addEventListener('input', compute);
+  compute();
+</script>
+
+<style>
+  .sub { font-size: 1rem; margin: 0.5rem 0; color: var(--color-ink-700); }
+  .sep { border: 0; border-top: 1px solid var(--color-ink-200); margin: 1rem 0; }
+  .result-line { font-weight: 600; color: var(--color-ink-800); margin: 0.3rem 0 0; }
+</style>

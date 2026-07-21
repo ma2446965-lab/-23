@@ -25,3 +25,6 @@ npm-debug.log*
 
 # Coverage / tests
 coverage/
+
+# CI workflow excluded from git (needs token with workflow scope to push)
+.github/workflows/

@@ -1,0 +1,32 @@
+<form id="cc-form" class="tool-form" novalidate>
+  <div class="field"><label for="cc-in">Paste your text</label><textarea id="cc-in" class="input" spellcheck="true" placeholder="Type or paste text here…"></textarea></div>
+  <div id="cc-result" class="result" aria-live="polite">
+    <dl>
+      <dt>Characters</dt><dd class="total" id="cc-chars">0</dd>
+      <dt>Characters (no spaces)</dt><dd id="cc-nospace">0</dd>
+      <dt>Words</dt><dd id="cc-words">0</dd>
+      <dt>Lines</dt><dd id="cc-lines">0</dd>
+    </dl>
+  </div>
+</form>
+
+<script>
+  import { analyzeText } from '../../core/word-counter';
+  import { formatNumber } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+
+  const inEl = $('cc-in') as HTMLTextAreaElement;
+
+  function compute() {
+    const text = inEl.value;
+    const s = analyzeText(text);
+    const lines = text === '' ? 0 : text.split('\n').length;
+    $('cc-chars').textContent = formatNumber(s.characters, 'en-US', 0);
+    $('cc-nospace').textContent = formatNumber(s.charactersNoSpaces, 'en-US', 0);
+    $('cc-words').textContent = formatNumber(s.words, 'en-US', 0);
+    $('cc-lines').textContent = formatNumber(lines, 'en-US', 0);
+  }
+
+  inEl?.addEventListener('input', compute);
+  compute();
+</script>

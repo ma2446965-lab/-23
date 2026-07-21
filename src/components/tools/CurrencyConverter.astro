@@ -1,0 +1,51 @@
+<form id="cur-form" class="tool-form" novalidate>
+  <div class="field"><label for="cur-amount">Amount</label><input id="cur-amount" class="input" type="number" inputmode="decimal" step="any" value="100" /></div>
+  <div class="input-row">
+    <div class="field"><label for="cur-from">From</label><select id="cur-from" class="select"></select></div>
+    <div class="field"><label for="cur-to">To</label><select id="cur-to" class="select"></select></div>
+  </div>
+  <div class="actions"><button type="button" id="cur-swap" class="btn btn-ghost">Swap</button></div>
+  <p class="muted">Educational static rates — not live market data.</p>
+  <div id="cur-result" class="result" aria-live="polite" hidden>
+    <dl><dt>Converted</dt><dd class="total" id="cur-out"></dd></dl>
+  </div>
+</form>
+
+<script>
+  import { convertCurrency, listCurrencies } from '../../core/currency';
+  import { formatNumber } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+
+  const form = $('cur-form');
+  const fromSel = $('cur-from');
+  const toSel = $('cur-to');
+  const amountIn = $('cur-amount');
+  const result = $('cur-result');
+
+  const opts = listCurrencies().map((c) => `<option value="${c}">${c}</option>`).join('');
+  if (fromSel) fromSel.innerHTML = opts;
+  if (toSel) toSel.innerHTML = opts;
+  if (toSel) toSel.value = 'EUR';
+
+  function compute() {
+    const amount = parseFloat(amountIn?.value ?? '');
+    if (!Number.isFinite(amount)) {
+      result.hidden = true;
+      return;
+    }
+    const out = convertCurrency(amount, fromSel?.value ?? 'USD', toSel?.value ?? 'EUR');
+    $('cur-out').textContent = `${formatNumber(amount)} ${fromSel?.value} = ${formatNumber(out, 'en-US', 4)} ${toSel?.value}`;
+    result.hidden = false;
+  }
+
+  $('cur-swap')?.addEventListener('click', () => {
+    const t = fromSel?.value;
+    if (fromSel) fromSel.value = toSel?.value ?? '';
+    if (toSel) toSel.value = t ?? '';
+    compute();
+  });
+  amountIn?.addEventListener('input', compute);
+  fromSel?.addEventListener('change', compute);
+  toSel?.addEventListener('change', compute);
+  compute();
+</script>

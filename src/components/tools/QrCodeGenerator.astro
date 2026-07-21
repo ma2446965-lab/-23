@@ -1,0 +1,46 @@
+<form id="qr-form" class="tool-form" novalidate>
+  <div class="field"><label for="qr-text">Text or URL</label>
+    <textarea id="qr-text" class="input" spellcheck="false">https://calcutils.example</textarea>
+  </div>
+  <div class="field"><label for="qr-size">Size (px)</label>
+    <select id="qr-size" class="select"><option value="128">128</option><option value="256" selected>256</option><option value="512">512</option></select>
+  </div>
+  <div class="actions">
+    <button type="button" id="qr-gen" class="btn btn-primary">Generate</button>
+    <button type="button" id="qr-dl" class="btn btn-ghost copy-btn">Download PNG</button>
+  </div>
+  <div id="qr-result" class="qr-result"><canvas id="qr-canvas"></canvas></div>
+</form>
+
+<script>
+  import QRCode from 'qrcode';
+  import { $ } from '../../lib/dom';
+
+  const textEl = $('qr-text') as HTMLTextAreaElement;
+  const canvas = $('qr-canvas') as HTMLCanvasElement;
+
+  async function gen() {
+    const size = parseInt($('qr-size')?.value ?? '256', 10);
+    if (canvas && textEl.value) {
+      await QRCode.toCanvas(canvas, textEl.value, { width: size, margin: 1 });
+    }
+  }
+
+  $('qr-gen')?.addEventListener('click', gen);
+  textEl?.addEventListener('input', gen);
+  $('qr-dl')?.addEventListener('click', () => {
+    const url = canvas?.toDataURL('image/png');
+    if (url) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'qrcode.png';
+      a.click();
+    }
+  });
+  gen();
+</script>
+
+<style>
+  .qr-result { display: flex; justify-content: center; padding: 1rem; background: #fff; border-radius: 0.6rem; }
+  .qr-result canvas { max-width: 100%; }
+</style>

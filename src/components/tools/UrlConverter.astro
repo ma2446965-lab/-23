@@ -1,0 +1,49 @@
+<form id="url-form" class="tool-form" novalidate>
+  <div class="field"><label for="url-dir">Conversion</label>
+    <select id="url-dir" class="select">
+      <option value="encode" selected>Encode (text → URL)</option>
+      <option value="decode">Decode (URL → text)</option>
+    </select>
+  </div>
+  <div class="field"><label for="url-in">Input</label>
+    <textarea id="url-in" class="input" spellcheck="false">https://example.com/search?q=hello world & coffee</textarea>
+  </div>
+  <div class="field"><label for="url-out">Output</label>
+    <textarea id="url-out" class="input" readonly spellcheck="false"></textarea>
+  </div>
+  <div class="actions">
+    <button type="button" id="url-convert" class="btn btn-primary">Convert</button>
+    <button type="button" id="url-copy" class="btn btn-ghost copy-btn">Copy</button>
+  </div>
+  <p id="url-error" class="error-text" role="alert"></p>
+</form>
+
+<script>
+  import { encodeUrlComponent, decodeUrlComponent } from '../../core/url';
+  import { $ } from '../../lib/dom';
+
+  const dirSel = $('url-dir');
+  const inEl = $('url-in') as HTMLTextAreaElement;
+  const outEl = $('url-out') as HTMLTextAreaElement;
+  const errorEl = $('url-error');
+
+  function convert() {
+    errorEl.textContent = '';
+    try {
+      outEl.value = dirSel?.value === 'encode' ? encodeUrlComponent(inEl.value) : decodeUrlComponent(inEl.value);
+    } catch (e) {
+      errorEl.textContent = 'Invalid input: ' + (e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  $('url-convert')?.addEventListener('click', convert);
+  dirSel?.addEventListener('change', convert);
+  $('url-copy')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(outEl.value);
+      const b = $('url-copy'); if (b) b.textContent = 'Copied!';
+      setTimeout(() => b && (b.textContent = 'Copy'), 1500);
+    } catch {}
+  });
+  convert();
+</script>

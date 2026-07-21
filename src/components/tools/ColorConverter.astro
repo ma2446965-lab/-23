@@ -1,0 +1,81 @@
+<form id="color-form" class="tool-form" novalidate>
+  <div class="field">
+    <label for="color-hex">HEX</label>
+    <div class="input-group">
+      <input id="color-hex" class="input" type="text" value="#4f46e5" maxlength="7" />
+      <span id="color-preview" class="color-preview" aria-hidden="true"></span>
+    </div>
+  </div>
+  <div class="input-row">
+    <div class="field"><label for="color-r">R</label><input id="color-r" class="input" type="number" min="0" max="255" value="79" /></div>
+    <div class="field"><label for="color-g">G</label><input id="color-g" class="input" type="number" min="0" max="255" value="70" /></div>
+    <div class="field"><label for="color-b">B</label><input id="color-b" class="input" type="number" min="0" max="255" value="229" /></div>
+  </div>
+  <div class="input-row">
+    <div class="field"><label for="color-h">H</label><input id="color-h" class="input" type="number" min="0" max="360" value="243" /></div>
+    <div class="field"><label for="color-s">S</label><input id="color-s" class="input" type="number" min="0" max="100" value="79" /></div>
+    <div class="field"><label for="color-l">L</label><input id="color-l" class="input" type="number" min="0" max="100" value="59" /></div>
+  </div>
+  <p id="color-error" class="error-text" role="alert"></p>
+</form>
+
+<script>
+  import { hexToRgb, rgbToHex, rgbToHsl, hslToRgb, hexToHsl, hslToHex } from '../../core/color';
+  import { $ } from '../../lib/dom';
+
+  const hexIn = $('color-hex') as HTMLInputElement;
+  const rIn = $('color-r') as HTMLInputElement;
+  const gIn = $('color-g') as HTMLInputElement;
+  const bIn = $('color-b') as HTMLInputElement;
+  const hIn = $('color-h') as HTMLInputElement;
+  const sIn = $('color-s') as HTMLInputElement;
+  const lIn = $('color-l') as HTMLInputElement;
+  const preview = $('color-preview');
+  const errorEl = $('color-error');
+
+  function setPreview(hex: string) {
+    if (preview) preview.style.background = hex;
+  }
+
+  function fromHex() {
+    const rgb = hexToRgb(hexIn.value);
+    if (!rgb) { errorEl.textContent = 'Invalid HEX'; return; }
+    errorEl.textContent = '';
+    rIn.value = String(rgb.r); gIn.value = String(rgb.g); bIn.value = String(rgb.b);
+    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+    hIn.value = String(hsl.h); sIn.value = String(hsl.s); lIn.value = String(hsl.l);
+    setPreview(hexIn.value);
+  }
+  function fromRgb() {
+    const r = parseInt(rIn.value, 10), g = parseInt(gIn.value, 10), b = parseInt(bIn.value, 10);
+    if ([r, g, b].some((n) => isNaN(n) || n < 0 || n > 255)) { errorEl.textContent = 'RGB must be 0–255'; return; }
+    errorEl.textContent = '';
+    const hex = rgbToHex(r, g, b);
+    hexIn.value = hex;
+    const hsl = rgbToHsl(r, g, b);
+    hIn.value = String(hsl.h); sIn.value = String(hsl.s); lIn.value = String(hsl.l);
+    setPreview(hex);
+  }
+  function fromHsl() {
+    const h = parseInt(hIn.value, 10), s = parseInt(sIn.value, 10), l = parseInt(lIn.value, 10);
+    if ([h, s, l].some((n) => isNaN(n))) { errorEl.textContent = 'Invalid HSL'; return; }
+    errorEl.textContent = '';
+    const rgb = hslToRgb(h, s, l);
+    hexIn.value = rgbToHex(rgb.r, rgb.g, rgb.b);
+    rIn.value = String(rgb.r); gIn.value = String(rgb.g); bIn.value = String(rgb.b);
+    setPreview(hexIn.value);
+  }
+
+  hexIn.addEventListener('input', fromHex);
+  [rIn, gIn, bIn].forEach((el) => el.addEventListener('input', fromRgb));
+  [hIn, sIn, lIn].forEach((el) => el.addEventListener('input', fromHsl));
+  fromHex();
+</script>
+
+<style>
+  .color-preview {
+    width: 46px;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-ink-300);
+  }
+</style>

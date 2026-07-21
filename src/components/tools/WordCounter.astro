@@ -1,0 +1,34 @@
+<form id="wc-form" class="tool-form" novalidate>
+  <div class="field"><label for="wc-in">Paste your text</label><textarea id="wc-in" class="input" spellcheck="true" placeholder="Type or paste text here…"></textarea></div>
+  <div id="wc-result" class="result" aria-live="polite">
+    <dl>
+      <dt>Words</dt><dd class="total" id="wc-words">0</dd>
+      <dt>Characters</dt><dd id="wc-chars">0</dd>
+      <dt>Characters (no spaces)</dt><dd id="wc-nospace">0</dd>
+      <dt>Sentences</dt><dd id="wc-sentences">0</dd>
+      <dt>Paragraphs</dt><dd id="wc-paragraphs">0</dd>
+      <dt>Est. reading time</dt><dd id="wc-read">1 min</dd>
+    </dl>
+  </div>
+</form>
+
+<script>
+  import { analyzeText } from '../../core/word-counter';
+  import { formatNumber } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+
+  const inEl = $('wc-in') as HTMLTextAreaElement;
+
+  function compute() {
+    const s = analyzeText(inEl.value);
+    $('wc-words').textContent = formatNumber(s.words, 'en-US', 0);
+    $('wc-chars').textContent = formatNumber(s.characters, 'en-US', 0);
+    $('wc-nospace').textContent = formatNumber(s.charactersNoSpaces, 'en-US', 0);
+    $('wc-sentences').textContent = formatNumber(s.sentences, 'en-US', 0);
+    $('wc-paragraphs').textContent = formatNumber(s.paragraphs, 'en-US', 0);
+    $('wc-read').textContent = `${formatNumber(s.readingTimeMinutes, 'en-US', 0)} min`;
+  }
+
+  inEl?.addEventListener('input', compute);
+  compute();
+</script>

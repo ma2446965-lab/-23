@@ -1,0 +1,61 @@
+<form id="inv-form" class="tool-form" novalidate>
+  <div class="field"><label for="inv-init">Initial investment ($)</label><input id="inv-init" class="input" type="number" inputmode="decimal" min="0" step="100" value="5000" /></div>
+  <div class="field"><label for="inv-mon">Monthly contribution ($)</label><input id="inv-mon" class="input" type="number" inputmode="decimal" min="0" step="50" value="200" /></div>
+  <div class="input-row">
+    <div class="field"><label for="inv-rate">Annual return (%)</label><input id="inv-rate" class="input" type="number" inputmode="decimal" min="0" step="0.1" value="8" /></div>
+    <div class="field"><label for="inv-years">Years</label><input id="inv-years" class="input" type="number" inputmode="decimal" min="1" step="1" value="20" /></div>
+  </div>
+  <div class="actions">
+    <button type="submit" class="btn btn-primary">Calculate</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="inv-error" class="error-text" role="alert"></p>
+  <div id="inv-result" class="result" aria-live="polite" hidden>
+    <dl>
+      <dt>Future value</dt><dd class="total" id="inv-fv"></dd>
+      <dt>Total contributed</dt><dd id="inv-contrib"></dd>
+      <dt>Total interest</dt><dd id="inv-int"></dd>
+    </dl>
+    <details><summary>Year-by-year</summary><div class="table-wrap"><table id="inv-table"></table></div></details>
+  </div>
+</form>
+
+<script>
+  import { calcInvestment } from '../../core/investment';
+  import { formatCurrency } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+
+  const form = $('inv-form');
+  const result = $('inv-result');
+  const errorEl = $('inv-error');
+
+  function compute() {
+    errorEl.textContent = '';
+    const initial = parseFloat($('inv-init')?.value ?? '');
+    const monthly = parseFloat($('inv-mon')?.value ?? '');
+    const rate = parseFloat($('inv-rate')?.value ?? '');
+    const years = parseFloat($('inv-years')?.value ?? '');
+
+    if (![initial, monthly, rate, years].every(Number.isFinite) || years <= 0) {
+      result.hidden = true;
+      errorEl.textContent = 'Enter valid positive numbers.';
+      return;
+    }
+    const r = calcInvestment({ initial, monthlyContribution: monthly, annualReturn: rate, years });
+    $('inv-fv').textContent = formatCurrency(r.futureValue);
+    $('inv-contrib').textContent = formatCurrency(r.totalContributed);
+    $('inv-int').textContent = formatCurrency(r.totalInterest);
+    result.hidden = false;
+
+    const tbl = $('inv-table');
+    if (tbl) {
+      const head = '<thead><tr><th>Year</th><th>Contributed</th><th>Interest</th><th>Balance</th></tr></thead>';
+      const rows = r.byYear.map((y) => `<tr><td>${y.year}</td><td>${formatCurrency(y.contributed)}</td><td>${formatCurrency(y.interest)}</td><td>${formatCurrency(y.balance)}</td></tr>`).join('');
+      tbl.innerHTML = head + '<tbody>' + rows + '</tbody>';
+    }
+  }
+
+  form?.addEventListener('input', compute);
+  form?.addEventListener('submit', (e: Event) => { e.preventDefault(); compute(); });
+  compute();
+</script>

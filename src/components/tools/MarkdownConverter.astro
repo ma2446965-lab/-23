@@ -1,0 +1,54 @@
+<form id="md-form" class="tool-form" novalidate>
+  <div class="field"><label for="md-dir">Conversion</label>
+    <select id="md-dir" class="select">
+      <option value="toHtml" selected>Markdown → HTML</option>
+      <option value="toMd">HTML → Markdown</option>
+    </select>
+  </div>
+  <div class="field"><label for="md-in">Input</label>
+    <textarea id="md-in" class="input" spellcheck="false"># Hello
+
+This is **bold** and this is *italic*.
+
+- one
+- two</textarea>
+  </div>
+  <div class="field"><label for="md-out">Output</label>
+    <textarea id="md-out" class="input" readonly spellcheck="false"></textarea>
+  </div>
+  <div class="actions">
+    <button type="button" id="md-convert" class="btn btn-primary">Convert</button>
+    <button type="button" id="md-copy" class="btn btn-ghost copy-btn">Copy</button>
+  </div>
+  <p id="md-error" class="error-text" role="alert"></p>
+</form>
+
+<script>
+  import { markdownToHtml, htmlToMarkdown } from '../../core/markdown';
+  import { $ } from '../../lib/dom';
+
+  const dirSel = $('md-dir');
+  const inEl = $('md-in') as HTMLTextAreaElement;
+  const outEl = $('md-out') as HTMLTextAreaElement;
+  const errorEl = $('md-error');
+
+  function convert() {
+    errorEl.textContent = '';
+    try {
+      outEl.value = dirSel?.value === 'toHtml' ? markdownToHtml(inEl.value) : htmlToMarkdown(inEl.value);
+    } catch (e) {
+      errorEl.textContent = 'Conversion failed: ' + (e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  $('md-convert')?.addEventListener('click', convert);
+  dirSel?.addEventListener('change', convert);
+  $('md-copy')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(outEl.value);
+      const b = $('md-copy'); if (b) b.textContent = 'Copied!';
+      setTimeout(() => b && (b.textContent = 'Copy'), 1500);
+    } catch {}
+  });
+  convert();
+</script>

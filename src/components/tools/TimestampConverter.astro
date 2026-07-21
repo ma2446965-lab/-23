@@ -1,0 +1,75 @@
+<form id="ts-form" class="tool-form" novalidate>
+  <h3 class="sub">Unix timestamp → date</h3>
+  <div class="input-row">
+    <div class="field"><label for="ts-value">Timestamp</label><input id="ts-value" class="input" type="number" step="1" value="1700000000" /></div>
+    <div class="field"><label for="ts-unit">Unit</label>
+      <select id="ts-unit" class="select"><option value="s">Seconds</option><option value="ms">Milliseconds</option></select>
+    </div>
+  </div>
+  <div class="actions"><button type="button" id="ts-now" class="btn btn-ghost">Use current time</button></div>
+  <div id="ts-out" class="result" aria-live="polite">
+    <dl>
+      <dt>ISO 8601</dt><dd id="ts-iso"></dd>
+      <dt>UTC</dt><dd id="ts-utc"></dd>
+      <dt>Local</dt><dd id="ts-local"></dd>
+    </dl>
+  </div>
+
+  <hr class="sep" />
+
+  <h3 class="sub">Date → Unix timestamp</h3>
+  <div class="input-row">
+    <div class="field"><label for="ts-date">Date</label><input id="ts-date" class="input" type="date" value="2023-11-14" /></div>
+    <div class="field"><label for="ts-time">Time</label><input id="ts-time" class="input" type="time" value="22:13:20" /></div>
+  </div>
+  <div id="ts-out2" class="result" aria-live="polite">
+    <dl>
+      <dt>Seconds</dt><dd class="total" id="ts-sec"></dd>
+      <dt>Milliseconds</dt><dd id="ts-ms"></dd>
+    </dl>
+  </div>
+</form>
+
+<script>
+  import { timestampToDate, dateToTimestamp, currentTimestamp } from '../../core/timestamp';
+  import { $ } from '../../lib/dom';
+
+  const form = $('ts-form');
+
+  function toDate() {
+    const v = parseInt($('ts-value')?.value ?? '', 10);
+    const unit = $('ts-unit')?.value;
+    if (!Number.isFinite(v)) return;
+    try {
+      const parts = timestampToDate(v, unit === 'ms');
+      $('ts-iso').textContent = parts.iso;
+      $('ts-utc').textContent = parts.utc;
+      $('ts-local').textContent = parts.local;
+    } catch {}
+  }
+
+  function toTimestamp() {
+    const d = $('ts-date')?.value;
+    const t = $('ts-time')?.value || '00:00:00';
+    if (!d) return;
+    const dt = new Date(`${d}T${t}`);
+    if (isNaN(dt.getTime())) return;
+    $('ts-sec').textContent = String(dateToTimestamp(dt, false));
+    $('ts-ms').textContent = String(dateToTimestamp(dt, true));
+  }
+
+  form?.addEventListener('input', () => { toDate(); toTimestamp(); });
+  $('ts-now')?.addEventListener('click', () => {
+    const v = currentTimestamp(false);
+    const el = $('ts-value') as HTMLInputElement;
+    if (el) el.value = String(v);
+    toDate();
+  });
+  toDate();
+  toTimestamp();
+</script>
+
+<style>
+  .sub { font-size: 1rem; margin: 0.5rem 0; color: var(--color-ink-700); }
+  .sep { border: 0; border-top: 1px solid var(--color-ink-200); margin: 1rem 0; }
+</style>

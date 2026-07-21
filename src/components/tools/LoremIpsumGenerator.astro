@@ -1,0 +1,37 @@
+<form id="lor-form" class="tool-form" novalidate>
+  <div class="input-row">
+    <div class="field"><label for="lor-p">Paragraphs</label><input id="lor-p" class="input" type="number" min="1" max="50" value="3" /></div>
+    <div class="field"><label for="lor-s">Sentences / paragraph</label><input id="lor-s" class="input" type="number" min="1" max="20" value="5" /></div>
+  </div>
+  <div class="field"><label><input type="checkbox" id="lor-start" checked /> Start with "Lorem ipsum dolor sit amet"</label></div>
+  <div class="actions">
+    <button type="button" id="lor-gen" class="btn btn-primary">Generate</button>
+    <button type="button" id="lor-copy" class="btn btn-ghost copy-btn">Copy</button>
+  </div>
+  <div class="field"><label for="lor-out">Output</label><textarea id="lor-out" class="input" readonly spellcheck="false"></textarea></div>
+</form>
+
+<script>
+  import { loremIpsum } from '../../core/lorem';
+  import { $ } from '../../lib/dom';
+
+  const out = $('lor-out') as HTMLTextAreaElement;
+
+  function gen() {
+    const p = parseInt(($('lor-p') as HTMLInputElement)?.value ?? '3', 10) || 3;
+    const s = parseInt(($('lor-s') as HTMLInputElement)?.value ?? '5', 10) || 5;
+    const start = ($('lor-start') as HTMLInputElement)?.checked ?? true;
+    out.value = loremIpsum(p, s, start);
+  }
+
+  $('lor-gen')?.addEventListener('click', gen);
+  ['lor-p', 'lor-s', 'lor-start'].forEach((id) => $(id)?.addEventListener('input', gen));
+  $('lor-copy')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(out.value);
+      const b = $('lor-copy'); if (b) b.textContent = 'Copied!';
+      setTimeout(() => b && (b.textContent = 'Copy'), 1500);
+    } catch {}
+  });
+  gen();
+</script>

@@ -1,0 +1,31 @@
+<form id="uuid-form" class="tool-form" novalidate>
+  <div class="field"><label for="uuid-count">How many UUIDs?</label><input id="uuid-count" class="input" type="number" min="1" max="100" value="5" /></div>
+  <div class="actions">
+    <button type="button" id="uuid-gen" class="btn btn-primary">Generate</button>
+    <button type="button" id="uuid-copy" class="btn btn-ghost copy-btn">Copy</button>
+  </div>
+  <div class="field"><label for="uuid-out">Output</label><textarea id="uuid-out" class="input" readonly spellcheck="false"></textarea></div>
+</form>
+
+<script>
+  import { generateUuid } from '../../core/uuid';
+  import { $ } from '../../lib/dom';
+
+  const out = $('uuid-out') as HTMLTextAreaElement;
+
+  function gen() {
+    const n = Math.max(1, Math.min(100, parseInt(($('uuid-count') as HTMLInputElement)?.value ?? '5', 10) || 5));
+    out.value = Array.from({ length: n }, () => generateUuid()).join('\n');
+  }
+
+  $('uuid-gen')?.addEventListener('click', gen);
+  $('uuid-count')?.addEventListener('input', gen);
+  $('uuid-copy')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(out.value);
+      const b = $('uuid-copy'); if (b) b.textContent = 'Copied!';
+      setTimeout(() => b && (b.textContent = 'Copy'), 1500);
+    } catch {}
+  });
+  gen();
+</script>

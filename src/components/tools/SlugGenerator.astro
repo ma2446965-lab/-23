@@ -1,0 +1,30 @@
+<form id="slug-form" class="tool-form" novalidate>
+  <div class="field"><label for="slug-in">Title or text</label><textarea id="slug-in" class="input" spellcheck="false">How to Bake a Chocolate Cake (Easy Recipe)!</textarea></div>
+  <div class="actions">
+    <button type="button" id="slug-gen" class="btn btn-primary">Generate</button>
+    <button type="button" id="slug-copy" class="btn btn-ghost copy-btn">Copy</button>
+  </div>
+  <div class="field"><label for="slug-out">Slug</label><input id="slug-out" class="input" type="text" readonly /></div>
+</form>
+
+<script>
+  import { slugify } from '../../core/slug';
+  import { $ } from '../../lib/dom';
+
+  const out = $('slug-out') as HTMLInputElement;
+
+  function gen() {
+    out.value = slugify(($('slug-in') as HTMLTextAreaElement)?.value ?? '');
+  }
+
+  $('slug-gen')?.addEventListener('click', gen);
+  $('slug-in')?.addEventListener('input', gen);
+  $('slug-copy')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(out.value);
+      const b = $('slug-copy'); if (b) b.textContent = 'Copied!';
+      setTimeout(() => b && (b.textContent = 'Copy'), 1500);
+    } catch {}
+  });
+  gen();
+</script>

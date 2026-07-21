@@ -1,0 +1,60 @@
+<form id="tax-form" class="tool-form" novalidate>
+  <div class="field"><label for="tax-income">Annual taxable income ($)</label><input id="tax-income" class="input" type="number" inputmode="decimal" min="0" step="1000" value="75000" /></div>
+  <div class="field">
+    <label for="tax-state">State</label>
+    <select id="tax-state" class="select"></select>
+  </div>
+  <div class="actions">
+    <button type="submit" class="btn btn-primary">Calculate</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="tax-error" class="error-text" role="alert"></p>
+  <div id="tax-result" class="result" aria-live="polite" hidden>
+    <dl>
+      <dt>Federal tax (est.)</dt><dd id="tax-fed"></dd>
+      <dt>State tax (est.)</dt><dd id="tax-state-amt"></dd>
+      <dt>Total tax</dt><dd class="total" id="tax-total"></dd>
+      <dt>Effective rate</dt><dd id="tax-eff"></dd>
+      <dt>Take-home (after tax)</dt><dd id="tax-net"></dd>
+    </dl>
+  </div>
+</form>
+
+<script>
+  import { calcTax, listStates } from '../../core/tax';
+  import { formatCurrency, formatPercent } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+
+  const form = $('tax-form');
+  const stateSel = $('tax-state');
+  const result = $('tax-result');
+  const errorEl = $('tax-error');
+
+  if (stateSel) {
+    stateSel.innerHTML = listStates()
+      .map((s) => `<option value="${s.code}">${s.name}</option>`)
+      .join('');
+  }
+
+  function compute() {
+    errorEl.textContent = '';
+    const income = parseFloat($('tax-income')?.value ?? '');
+    const state = stateSel?.value ?? 'none';
+    if (!Number.isFinite(income) || income < 0) {
+      result.hidden = true;
+      errorEl.textContent = 'Enter a valid income.';
+      return;
+    }
+    const r = calcTax({ income, state });
+    $('tax-fed').textContent = formatCurrency(r.federal);
+    $('tax-state-amt').textContent = formatCurrency(r.state);
+    $('tax-total').textContent = formatCurrency(r.total);
+    $('tax-eff').textContent = formatPercent(r.effectiveRate);
+    $('tax-net').textContent = formatCurrency(income - r.total);
+    result.hidden = false;
+  }
+
+  form?.addEventListener('input', compute);
+  form?.addEventListener('submit', (e: Event) => { e.preventDefault(); compute(); });
+  compute();
+</script>

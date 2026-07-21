@@ -1,0 +1,59 @@
+<form id="ret-form" class="tool-form" novalidate>
+  <div class="input-row">
+    <div class="field"><label for="ret-cur">Current age</label><input id="ret-cur" class="input" type="number" inputmode="decimal" min="0" step="1" value="30" /></div>
+    <div class="field"><label for="ret-ret">Retirement age</label><input id="ret-ret" class="input" type="number" inputmode="decimal" min="0" step="1" value="65" /></div>
+  </div>
+  <div class="field"><label for="ret-sav">Current savings ($)</label><input id="ret-sav" class="input" type="number" inputmode="decimal" min="0" step="1000" value="10000" /></div>
+  <div class="input-row">
+    <div class="field"><label for="ret-mon">Monthly contribution ($)</label><input id="ret-mon" class="input" type="number" inputmode="decimal" min="0" step="50" value="500" /></div>
+    <div class="field"><label for="ret-rate">Annual return (%)</label><input id="ret-rate" class="input" type="number" inputmode="decimal" min="0" step="0.1" value="7" /></div>
+  </div>
+  <div class="actions">
+    <button type="submit" class="btn btn-primary">Calculate</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="ret-error" class="error-text" role="alert"></p>
+  <div id="ret-result" class="result" aria-live="polite" hidden>
+    <dl>
+      <dt>Projected balance</dt><dd class="total" id="ret-bal"></dd>
+      <dt>Total contributed</dt><dd id="ret-contrib"></dd>
+      <dt>Total interest earned</dt><dd id="ret-int"></dd>
+      <dt>Monthly income at retirement (4% rule)</dt><dd id="ret-mon"></dd>
+    </dl>
+  </div>
+</form>
+
+<script>
+  import { calcRetirement } from '../../core/retirement';
+  import { formatCurrency } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+
+  const form = $('ret-form');
+  const result = $('ret-result');
+  const errorEl = $('ret-error');
+
+  function compute() {
+    errorEl.textContent = '';
+    const currentAge = parseFloat($('ret-cur')?.value ?? '');
+    const retirementAge = parseFloat($('ret-ret')?.value ?? '');
+    const savings = parseFloat($('ret-sav')?.value ?? '');
+    const monthly = parseFloat($('ret-mon')?.value ?? '');
+    const rate = parseFloat($('ret-rate')?.value ?? '');
+
+    if (![currentAge, retirementAge, savings, monthly, rate].every(Number.isFinite) || retirementAge <= currentAge) {
+      result.hidden = true;
+      errorEl.textContent = 'Enter valid numbers and a retirement age greater than current age.';
+      return;
+    }
+    const r = calcRetirement({ currentAge, retirementAge, currentSavings: savings, monthlyContribution: monthly, annualReturn: rate });
+    $('ret-bal').textContent = formatCurrency(r.projectedBalance);
+    $('ret-contrib').textContent = formatCurrency(r.totalContributed);
+    $('ret-int').textContent = formatCurrency(r.totalInterest);
+    $('ret-mon').textContent = formatCurrency(r.monthlyAtRetirement);
+    result.hidden = false;
+  }
+
+  form?.addEventListener('input', compute);
+  form?.addEventListener('submit', (e: Event) => { e.preventDefault(); compute(); });
+  compute();
+</script>

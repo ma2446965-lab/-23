@@ -13,6 +13,30 @@ import UnitConverter from '../../components/tools/UnitConverter.astro';
 import TemperatureConverter from '../../components/tools/TemperatureConverter.astro';
 import JsonCsvConverter from '../../components/tools/JsonCsvConverter.astro';
 import PasswordGenerator from '../../components/tools/PasswordGenerator.astro';
+import RetirementCalculator from '../../components/tools/RetirementCalculator.astro';
+import InvestmentCalculator from '../../components/tools/InvestmentCalculator.astro';
+import TaxCalculator from '../../components/tools/TaxCalculator.astro';
+import CalorieCalculator from '../../components/tools/CalorieCalculator.astro';
+import PregnancyCalculator from '../../components/tools/PregnancyCalculator.astro';
+import ScientificCalculator from '../../components/tools/ScientificCalculator.astro';
+import DateCalculator from '../../components/tools/DateCalculator.astro';
+import TimeCalculator from '../../components/tools/TimeCalculator.astro';
+import CurrencyConverter from '../../components/tools/CurrencyConverter.astro';
+import MarkdownConverter from '../../components/tools/MarkdownConverter.astro';
+import Base64Converter from '../../components/tools/Base64Converter.astro';
+import UrlConverter from '../../components/tools/UrlConverter.astro';
+import ColorConverter from '../../components/tools/ColorConverter.astro';
+import TimestampConverter from '../../components/tools/TimestampConverter.astro';
+import QrCodeGenerator from '../../components/tools/QrCodeGenerator.astro';
+import LoremIpsumGenerator from '../../components/tools/LoremIpsumGenerator.astro';
+import UuidGenerator from '../../components/tools/UuidGenerator.astro';
+import InvoicePdfGenerator from '../../components/tools/InvoicePdfGenerator.astro';
+import RandomNameGenerator from '../../components/tools/RandomNameGenerator.astro';
+import RandomNumberGenerator from '../../components/tools/RandomNumberGenerator.astro';
+import TextCaseConverter from '../../components/tools/TextCaseConverter.astro';
+import WordCounter from '../../components/tools/WordCounter.astro';
+import CharacterCounter from '../../components/tools/CharacterCounter.astro';
+import SlugGenerator from '../../components/tools/SlugGenerator.astro';
 
 export const getStaticPaths = (() =>
   tools.map((t) => ({
@@ -34,6 +58,30 @@ const components: Record<string, any> = {
   'temperature-converter': TemperatureConverter,
   'json-csv-converter': JsonCsvConverter,
   'password-generator': PasswordGenerator,
+  'retirement-calculator': RetirementCalculator,
+  'investment-calculator': InvestmentCalculator,
+  'tax-calculator': TaxCalculator,
+  'calorie-calculator': CalorieCalculator,
+  'pregnancy-calculator': PregnancyCalculator,
+  'scientific-calculator': ScientificCalculator,
+  'date-calculator': DateCalculator,
+  'time-calculator': TimeCalculator,
+  'currency-converter': CurrencyConverter,
+  'markdown-converter': MarkdownConverter,
+  'base64-converter': Base64Converter,
+  'url-converter': UrlConverter,
+  'color-converter': ColorConverter,
+  'timestamp-converter': TimestampConverter,
+  'qr-code-generator': QrCodeGenerator,
+  'lorem-ipsum-generator': LoremIpsumGenerator,
+  'uuid-generator': UuidGenerator,
+  'invoice-pdf-generator': InvoicePdfGenerator,
+  'random-name-generator': RandomNameGenerator,
+  'random-number-generator': RandomNumberGenerator,
+  'text-case-converter': TextCaseConverter,
+  'word-counter': WordCounter,
+  'character-counter': CharacterCounter,
+  'slug-generator': SlugGenerator,
 };
 
 const ToolComponent = components[tool.slug];

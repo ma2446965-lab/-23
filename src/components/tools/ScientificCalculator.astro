@@ -1,0 +1,96 @@
+<div class="sci">
+  <input id="sci-display" class="input" type="text" inputmode="text" value="2 ^ 8" aria-label="Expression" />
+  <p id="sci-error" class="error-text" role="alert"></p>
+  <div class="sci-grid">
+    <button type="button" class="sci-btn" data-k="7">7</button>
+    <button type="button" class="sci-btn" data-k="8">8</button>
+    <button type="button" class="sci-btn" data-k="9">9</button>
+    <button type="button" class="sci-btn op" data-k="/">÷</button>
+    <button type="button" class="sci-btn fn" data-k="sqrt(">√</button>
+    <button type="button" class="sci-btn" data-k="4">4</button>
+    <button type="button" class="sci-btn" data-k="5">5</button>
+    <button type="button" class="sci-btn" data-k="6">6</button>
+    <button type="button" class="sci-btn op" data-k="*">×</button>
+    <button type="button" class="sci-btn fn" data-k="sin(">sin</button>
+    <button type="button" class="sci-btn" data-k="1">1</button>
+    <button type="button" class="sci-btn" data-k="2">2</button>
+    <button type="button" class="sci-btn" data-k="3">3</button>
+    <button type="button" class="sci-btn op" data-k="-">−</button>
+    <button type="button" class="sci-btn fn" data-k="cos(">cos</button>
+    <button type="button" class="sci-btn" data-k="0">0</button>
+    <button type="button" class="sci-btn" data-k=".">.</button>
+    <button type="button" class="sci-btn fn" data-k="(">(</button>
+    <button type="button" class="sci-btn op" data-k="+">+</button>
+    <button type="button" class="sci-btn fn" data-k="tan(">tan</button>
+    <button type="button" class="sci-btn fn" data-k="pi">π</button>
+    <button type="button" class="sci-btn fn" data-k="e">e</button>
+    <button type="button" class="sci-btn fn" data-k=")">)</button>
+    <button type="button" class="sci-btn op" data-k="^">^</button>
+    <button type="button" class="sci-btn fn" data-k="log(">log</button>
+    <button type="button" class="sci-btn act" id="sci-c">C</button>
+    <button type="button" class="sci-btn act" id="sci-bs">⌫</button>
+    <button type="button" class="sci-btn act" id="sci-eq">=</button>
+  </div>
+  <p class="sci-hint">Functions: sin, cos, tan, sqrt, log (base 10), ln. Constants: pi, e. Example: <code>sqrt(16) + 2^3</code></p>
+</div>
+
+<script>
+  import { evaluateExpression } from '../../core/scientific';
+  import { $ } from '../../lib/dom';
+
+  const display = $('sci-display') as HTMLInputElement;
+  const errorEl = $('sci-error');
+
+  function append(k: string) {
+    display.value += k;
+  }
+  function evaluate() {
+    errorEl.textContent = '';
+    try {
+      const res = evaluateExpression(display.value);
+      display.value = String(Math.round(res * 1e10) / 1e10);
+    } catch (e) {
+      errorEl.textContent = 'Invalid expression';
+    }
+  }
+
+  document.querySelectorAll('.sci-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const k = (btn as HTMLElement).getAttribute('data-k');
+      if (k) append(k);
+    });
+  });
+  $('sci-eq')?.addEventListener('click', evaluate);
+  $('sci-c')?.addEventListener('click', () => (display.value = ''));
+  $('sci-bs')?.addEventListener('click', () => (display.value = display.value.slice(0, -1)));
+  display?.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      evaluate();
+    }
+  });
+</script>
+
+<style>
+  .sci { max-width: 340px; }
+  .sci-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+  }
+  .sci-btn {
+    padding: 0.7rem 0;
+    font-size: 1rem;
+    border: 1px solid var(--color-ink-300);
+    border-radius: 0.5rem;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .sci-btn:hover { background: var(--color-brand-50); }
+  .sci-btn.op { background: var(--color-brand-600); color: #fff; border-color: var(--color-brand-600); }
+  .sci-btn.fn { background: var(--color-ink-100); }
+  .sci-btn.act { background: var(--color-ink-800); color: #fff; border-color: var(--color-ink-800); }
+  .sci-hint { font-size: 0.82rem; color: var(--color-ink-500); margin-top: 0.6rem; }
+</style>

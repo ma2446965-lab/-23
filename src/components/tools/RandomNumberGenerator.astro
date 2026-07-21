@@ -1,0 +1,38 @@
+<form id="rng-form" class="tool-form" novalidate>
+  <div class="input-row">
+    <div class="field"><label for="rng-min">Min</label><input id="rng-min" class="input" type="number" value="1" /></div>
+    <div class="field"><label for="rng-max">Max</label><input id="rng-max" class="input" type="number" value="100" /></div>
+  </div>
+  <div class="field"><label for="rng-count">How many?</label><input id="rng-count" class="input" type="number" min="1" max="500" value="5" /></div>
+  <div class="actions">
+    <button type="button" id="rng-gen" class="btn btn-primary">Generate</button>
+    <button type="button" id="rng-copy" class="btn btn-ghost copy-btn">Copy</button>
+  </div>
+  <div class="field"><label for="rng-out">Output</label><textarea id="rng-out" class="input" readonly spellcheck="false"></textarea></div>
+</form>
+
+<script>
+  import { randomInt } from '../../core/random-number';
+  import { $ } from '../../lib/dom';
+
+  const out = $('rng-out') as HTMLTextAreaElement;
+
+  function gen() {
+    const min = parseInt(($('rng-min') as HTMLInputElement)?.value ?? '1', 10);
+    const max = parseInt(($('rng-max') as HTMLInputElement)?.value ?? '100', 10);
+    const n = Math.max(1, Math.min(500, parseInt(($('rng-count') as HTMLInputElement)?.value ?? '5', 10) || 5));
+    if (isNaN(min) || isNaN(max) || max < min) { out.value = 'Enter a valid min ≤ max.'; return; }
+    out.value = Array.from({ length: n }, () => randomInt(min, max)).join('\n');
+  }
+
+  $('rng-gen')?.addEventListener('click', gen);
+  ['rng-min', 'rng-max', 'rng-count'].forEach((id) => $(id)?.addEventListener('input', gen));
+  $('rng-copy')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(out.value);
+      const b = $('rng-copy'); if (b) b.textContent = 'Copied!';
+      setTimeout(() => b && (b.textContent = 'Copy'), 1500);
+    } catch {}
+  });
+  gen();
+</script>

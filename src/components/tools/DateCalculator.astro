@@ -1,0 +1,51 @@
+<form id="date-form" class="tool-form" novalidate>
+  <h3 class="sub">Difference between two dates</h3>
+  <div class="input-row">
+    <div class="field"><label for="date-a">Date 1</label><input id="date-a" class="input" type="date" value="2025-01-01" /></div>
+    <div class="field"><label for="date-b">Date 2</label><input id="date-b" class="input" type="date" value="2025-12-31" /></div>
+  </div>
+  <p id="date-diff" class="result-line"></p>
+
+  <hr class="sep" />
+
+  <h3 class="sub">Add / subtract days</h3>
+  <div class="input-row">
+    <div class="field"><label for="date-start">Start date</label><input id="date-start" class="input" type="date" value="2025-01-01" /></div>
+    <div class="field"><label for="date-days">Days (use − to subtract)</label><input id="date-days" class="input" type="number" step="1" value="90" /></div>
+  </div>
+  <p id="date-add" class="result-line"></p>
+</form>
+
+<script>
+  import { daysBetween, addDaysToDate } from '../../core/date';
+  import { formatNumber } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+
+  const form = $('date-form');
+
+  function compute() {
+    const diffEl = $('date-diff');
+    const addEl = $('date-add');
+    const d1 = $('date-a')?.value ?? '';
+    const d2 = $('date-b')?.value ?? '';
+    const days = daysBetween(d1, d2);
+    if (diffEl) {
+      diffEl.textContent = days === null ? 'Enter two valid dates.' : `${formatNumber(days, 'en-US', 0)} days (${formatNumber(Math.abs(days) / 7, 'en-US', 1)} weeks)`;
+    }
+    const start = $('date-start')?.value ?? '';
+    const n = parseInt($('date-days')?.value ?? '0', 10);
+    const added = addDaysToDate(start, n);
+    if (addEl) {
+      addEl.textContent = added ? `${start} ${n >= 0 ? '+' : ''}${n} days = ${added}` : 'Enter a valid date.';
+    }
+  }
+
+  form?.addEventListener('input', compute);
+  compute();
+</script>
+
+<style>
+  .sub { font-size: 1rem; margin: 0.5rem 0; color: var(--color-ink-700); }
+  .sep { border: 0; border-top: 1px solid var(--color-ink-200); margin: 1rem 0; }
+  .result-line { font-weight: 600; color: var(--color-ink-800); margin: 0.3rem 0 0; }
+</style>

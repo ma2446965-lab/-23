@@ -1,0 +1,51 @@
+<form id="preg-form" class="tool-form" novalidate>
+  <div class="field"><label for="preg-lmp">First day of last period</label><input id="preg-lmp" class="input" type="date" max={new Date().toISOString().slice(0, 10)} value="2025-01-01" /></div>
+  <div class="actions">
+    <button type="submit" class="btn btn-primary">Calculate</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="preg-error" class="error-text" role="alert"></p>
+  <div id="preg-result" class="result" aria-live="polite" hidden>
+    <dl>
+      <dt>Due date</dt><dd class="total" id="preg-due"></dd>
+      <dt>Conception date (est.)</dt><dd id="preg-conception"></dd>
+      <dt>Current gestational age</dt><dd id="preg-age"></dd>
+      <dt>Trimester</dt><dd id="preg-trimester"></dd>
+    </dl>
+  </div>
+</form>
+
+<script>
+  import { calcPregnancy } from '../../core/pregnancy';
+  import { $ } from '../../lib/dom';
+
+  const form = $('preg-form');
+  const result = $('preg-result');
+  const errorEl = $('preg-error');
+
+  function compute() {
+    errorEl.textContent = '';
+    const lmpVal = $('preg-lmp')?.value;
+    if (!lmpVal) {
+      result.hidden = true;
+      errorEl.textContent = 'Enter the first day of your last period.';
+      return;
+    }
+    const lmp = new Date(lmpVal + 'T00:00:00');
+    if (isNaN(lmp.getTime())) {
+      result.hidden = true;
+      errorEl.textContent = 'Invalid date.';
+      return;
+    }
+    const r = calcPregnancy(lmp, new Date());
+    $('preg-due').textContent = r.dueDate;
+    $('preg-conception').textContent = r.conceptionDate;
+    $('preg-age').textContent = `${r.gestationalWeeks} weeks, ${r.gestationalDays} days`;
+    $('preg-trimester').textContent = `Trimester ${r.trimester}`;
+    result.hidden = false;
+  }
+
+  form?.addEventListener('input', compute);
+  form?.addEventListener('submit', (e: Event) => { e.preventDefault(); compute(); });
+  compute();
+</script>
