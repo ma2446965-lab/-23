@@ -1,0 +1,47 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { tools } from '../../data/tools';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+
+import MortgageCalculator from '../../components/tools/MortgageCalculator.astro';
+import LoanCalculator from '../../components/tools/LoanCalculator.astro';
+import CompoundInterestCalculator from '../../components/tools/CompoundInterestCalculator.astro';
+import BmiCalculator from '../../components/tools/BmiCalculator.astro';
+import AgeCalculator from '../../components/tools/AgeCalculator.astro';
+import PercentageCalculator from '../../components/tools/PercentageCalculator.astro';
+import UnitConverter from '../../components/tools/UnitConverter.astro';
+import TemperatureConverter from '../../components/tools/TemperatureConverter.astro';
+import JsonCsvConverter from '../../components/tools/JsonCsvConverter.astro';
+import PasswordGenerator from '../../components/tools/PasswordGenerator.astro';
+
+export const getStaticPaths = (() =>
+  tools.map((t) => ({
+    params: { category: t.category, tool: t.slug },
+    props: { tool: t },
+  }))) satisfies GetStaticPaths;
+
+const { tool } = Astro.props;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const components: Record<string, any> = {
+  'mortgage-calculator': MortgageCalculator,
+  'loan-calculator': LoanCalculator,
+  'compound-interest-calculator': CompoundInterestCalculator,
+  'bmi-calculator': BmiCalculator,
+  'age-calculator': AgeCalculator,
+  'percentage-calculator': PercentageCalculator,
+  'unit-converter': UnitConverter,
+  'temperature-converter': TemperatureConverter,
+  'json-csv-converter': JsonCsvConverter,
+  'password-generator': PasswordGenerator,
+};
+
+const ToolComponent = components[tool.slug];
+if (!ToolComponent) {
+  throw new Error(`No interactive component registered for tool: ${tool.slug}`);
+}
+---
+
+<ToolLayout tool={tool}>
+  <ToolComponent />
+</ToolLayout>

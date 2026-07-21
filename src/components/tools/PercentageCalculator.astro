@@ -1,0 +1,88 @@
+<form id="pct-form" class="tool-form" novalidate>
+  <div class="field">
+    <label for="pct-mode">Calculation</label>
+    <select id="pct-mode" class="select">
+      <option value="of">What is X% of Y?</option>
+      <option value="what">X is what % of Y?</option>
+      <option value="amount">X is Y% of what?</option>
+      <option value="change">Percentage change from A to B?</option>
+    </select>
+  </div>
+
+  <div id="pct-of" class="input-row">
+    <div class="field"><label for="pct-of-x">X (%)</label><input id="pct-of-x" class="input" type="number" inputmode="decimal" step="0.1" value="20" /></div>
+    <div class="field"><label for="pct-of-y">Y (value)</label><input id="pct-of-y" class="input" type="number" inputmode="decimal" step="0.1" value="250" /></div>
+  </div>
+  <div id="pct-what" class="input-row" hidden>
+    <div class="field"><label for="pct-what-part">X (part)</label><input id="pct-what-part" class="input" type="number" inputmode="decimal" step="0.1" value="50" /></div>
+    <div class="field"><label for="pct-what-whole">Y (whole)</label><input id="pct-what-whole" class="input" type="number" inputmode="decimal" step="0.1" value="200" /></div>
+  </div>
+  <div id="pct-amount" class="input-row" hidden>
+    <div class="field"><label for="pct-amt-part">X (part)</label><input id="pct-amt-part" class="input" type="number" inputmode="decimal" step="0.1" value="50" /></div>
+    <div class="field"><label for="pct-amt-pct">Y (%)</label><input id="pct-amt-pct" class="input" type="number" inputmode="decimal" step="0.1" value="25" /></div>
+  </div>
+  <div id="pct-change" class="input-row" hidden>
+    <div class="field"><label for="pct-chg-old">A (original)</label><input id="pct-chg-old" class="input" type="number" inputmode="decimal" step="0.1" value="100" /></div>
+    <div class="field"><label for="pct-chg-new">B (new)</label><input id="pct-chg-new" class="input" type="number" inputmode="decimal" step="0.1" value="150" /></div>
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="btn btn-primary">Calculate</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="pct-error" class="error-text" role="alert"></p>
+
+  <div id="pct-result" class="result" aria-live="polite" hidden>
+    <dl><dt>Result</dt><dd class="total" id="pct-out"></dd></dl>
+  </div>
+</form>
+
+<script>
+  import { percentOf, whatPercent, amountFromPercent, percentageChange } from '../../core/percentage';
+  import { formatNumber } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+  const form = $('pct-form');
+  const modeSel = $('pct-mode');
+  const result = $('pct-result');
+  const errorEl = $('pct-error');
+
+  const groups = {
+    of: () => percentOf(parseFloat($('pct-of-x')?.value ?? ''), parseFloat($('pct-of-y')?.value ?? '')),
+    what: () => whatPercent(parseFloat($('pct-what-part')?.value ?? ''), parseFloat($('pct-what-whole')?.value ?? '')),
+    amount: () => amountFromPercent(parseFloat($('pct-amt-part')?.value ?? ''), parseFloat($('pct-amt-pct')?.value ?? '')),
+    change: () => percentageChange(parseFloat($('pct-chg-old')?.value ?? ''), parseFloat($('pct-chg-new')?.value ?? '')),
+  };
+
+  function syncGroups() {
+    ['of', 'what', 'amount', 'change'].forEach((m) => {
+      const el = $('pct-' + m);
+      if (el) el.hidden = m !== modeSel?.value;
+    });
+  }
+
+  function compute() {
+    errorEl.textContent = '';
+    const mode = modeSel?.value ?? 'of';
+    const out = (groups as Record<string, () => number>)[mode]!();
+    if (!Number.isFinite(out)) {
+      result.hidden = true;
+      errorEl.textContent = 'Please enter valid numbers (whole cannot be zero).';
+      return;
+    }
+    const suffix = mode === 'what' || mode === 'change' ? '%' : '';
+    $('pct-out').textContent = formatNumber(out, 'en-US', 4) + suffix;
+    result.hidden = false;
+  }
+
+  modeSel?.addEventListener('change', () => {
+    syncGroups();
+    compute();
+  });
+  form?.addEventListener('input', compute);
+  form?.addEventListener('submit', (e: Event) => {
+    e.preventDefault();
+    compute();
+  });
+  syncGroups();
+  compute();
+</script>

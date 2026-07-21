@@ -1,0 +1,67 @@
+<form id="tc-form" class="tool-form" novalidate>
+  <div class="input-row">
+    <div class="field">
+      <label for="tc-from">From</label>
+      <select id="tc-from" class="select">
+        <option value="C" selected>°C</option>
+        <option value="F">°F</option>
+        <option value="K">K</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="tc-to">To</label>
+      <select id="tc-to" class="select">
+        <option value="C">°C</option>
+        <option value="F" selected>°F</option>
+        <option value="K">K</option>
+      </select>
+    </div>
+  </div>
+  <div class="field">
+    <label for="tc-val">Temperature</label>
+    <input id="tc-val" class="input" type="number" inputmode="decimal" step="any" value="100" />
+  </div>
+  <div class="actions">
+    <button type="button" id="tc-swap" class="btn btn-ghost">Swap</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="tc-error" class="error-text" role="alert"></p>
+
+  <div id="tc-result" class="result" aria-live="polite" hidden>
+    <dl><dt>Result</dt><dd class="total" id="tc-out"></dd></dl>
+  </div>
+</form>
+
+<script>
+  import { convertTemperature, type TempUnit } from '../../core/temperature';
+  import { formatNumber } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+  const fromSel = $('tc-from');
+  const toSel = $('tc-to');
+  const valIn = $('tc-val');
+  const result = $('tc-result');
+
+  function compute() {
+    const v = parseFloat(valIn?.value ?? '');
+    if (!Number.isFinite(v)) {
+      result.hidden = true;
+      return;
+    }
+    const from = fromSel?.value as TempUnit;
+    const to = toSel?.value as TempUnit;
+    const out = convertTemperature(v, from, to);
+    $('tc-out').textContent = `${formatNumber(v)} ${from} = ${formatNumber(out)} ${to}`;
+    result.hidden = false;
+  }
+
+  $('tc-swap')?.addEventListener('click', () => {
+    const tmp = fromSel?.value;
+    if (fromSel) fromSel.value = toSel?.value ?? '';
+    if (toSel) toSel.value = tmp ?? '';
+    compute();
+  });
+  valIn?.addEventListener('input', compute);
+  fromSel?.addEventListener('change', compute);
+  toSel?.addEventListener('change', compute);
+  compute();
+</script>

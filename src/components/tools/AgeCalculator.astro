@@ -1,0 +1,73 @@
+<form id="age-form" class="tool-form" novalidate>
+  <div class="field">
+    <label for="age-birth">Date of birth</label>
+    <input id="age-birth" class="input" type="date" max={new Date().toISOString().slice(0, 10)} value="1990-01-01" />
+  </div>
+  <div class="field">
+    <label for="age-asof">Calculate age as of</label>
+    <input id="age-asof" class="input" type="date" max={new Date().toISOString().slice(0, 10)} value={new Date().toISOString().slice(0, 10)} />
+  </div>
+  <div class="actions">
+    <button type="submit" class="btn btn-primary">Calculate</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="age-error" class="error-text" role="alert"></p>
+
+  <div id="age-result" class="result" aria-live="polite" hidden>
+    <dl>
+      <dt>Age</dt><dd class="total" id="age-exact"></dd>
+      <dt>Total days lived</dt><dd id="age-days"></dd>
+      <dt>Total months</dt><dd id="age-months"></dd>
+      <dt>Born on a</dt><dd id="age-dow"></dd>
+      <dt>Next birthday in</dt><dd id="age-next"></dd>
+    </dl>
+  </div>
+</form>
+
+<script>
+  import { calcAge } from '../../core/age';
+  import { formatNumber } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+  const form = $('age-form');
+  const result = $('age-result');
+  const errorEl = $('age-error');
+
+  function parse(d: string) {
+    const v = $(d)?.value;
+    if (!v) return null;
+    const dt = new Date(v + 'T00:00:00');
+    return isNaN(dt.getTime()) ? null : dt;
+  }
+
+  function compute() {
+    errorEl.textContent = '';
+    const birth = parse('age-birth');
+    const asof = parse('age-asof') ?? new Date();
+
+    if (!birth) {
+      result.hidden = true;
+      errorEl.textContent = 'Please enter a valid date of birth.';
+      return;
+    }
+    if (birth.getTime() > asof.getTime()) {
+      result.hidden = true;
+      errorEl.textContent = 'Date of birth must be before the "as of" date.';
+      return;
+    }
+
+    const r = calcAge(birth, asof);
+    $('age-exact').textContent = `${r.years} years, ${r.months} months, ${r.days} days`;
+    $('age-days').textContent = formatNumber(r.totalDays, 'en-US', 0);
+    $('age-months').textContent = formatNumber(r.totalMonths, 'en-US', 0);
+    $('age-dow').textContent = r.dayOfWeek;
+    $('age-next').textContent = `${formatNumber(r.nextBirthdayInDays, 'en-US', 0)} days`;
+    result.hidden = false;
+  }
+
+  form?.addEventListener('input', compute);
+  form?.addEventListener('submit', (e: Event) => {
+    e.preventDefault();
+    compute();
+  });
+  compute();
+</script>

@@ -1,0 +1,91 @@
+<form id="loan-form" class="tool-form" novalidate>
+  <div class="field">
+    <label for="l-amount">Loan amount ($)</label>
+    <input id="l-amount" class="input" type="number" inputmode="decimal" min="0" step="500" value="10000" />
+  </div>
+  <div class="field">
+    <label for="l-rate">Annual interest rate (%)</label>
+    <input id="l-rate" class="input" type="number" inputmode="decimal" min="0" step="0.1" value="5" />
+  </div>
+  <div class="field">
+    <label for="l-term">Loan term (years)</label>
+    <input id="l-term" class="input" type="number" inputmode="decimal" min="0.1" step="0.5" value="5" />
+  </div>
+  <div class="field">
+    <label for="l-extra">Extra monthly payment ($)</label>
+    <input id="l-extra" class="input" type="number" inputmode="decimal" min="0" step="10" value="0" />
+  </div>
+  <div class="actions">
+    <button type="submit" class="btn btn-primary">Calculate</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="l-error" class="error-text" role="alert"></p>
+
+  <div id="l-result" class="result" aria-live="polite" hidden>
+    <dl>
+      <dt>Monthly payment</dt><dd id="l-payment"></dd>
+      <dt>Payoff time</dt><dd class="total" id="l-payoff"></dd>
+      <dt>Total interest</dt><dd id="l-interest"></dd>
+      <dt>Total paid</dt><dd id="l-paid"></dd>
+    </dl>
+    <details>
+      <summary>Amortization schedule</summary>
+      <div class="table-wrap"><table id="l-schedule"></table></div>
+    </details>
+  </div>
+</form>
+
+<script>
+  import { calcLoan } from '../../core/loan';
+  import { formatCurrency } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+  const form = $('loan-form');
+  const result = $('l-result');
+  const errorEl = $('l-error');
+
+  function compute() {
+    errorEl.textContent = '';
+    const amount = parseFloat($('l-amount')?.value ?? '');
+    const rate = parseFloat($('l-rate')?.value ?? '');
+    const term = parseFloat($('l-term')?.value ?? '');
+    const extra = parseFloat($('l-extra')?.value ?? '0') || 0;
+
+    if (![amount, rate, term].every(Number.isFinite) || amount <= 0 || term <= 0) {
+      result.hidden = true;
+      errorEl.textContent = 'Please enter valid positive numbers.';
+      return;
+    }
+
+    const r = calcLoan({ amount, annualRate: rate, termYears: term, extraMonthly: extra });
+    const years = Math.floor(r.payoffMonths / 12);
+    const months = r.payoffMonths % 12;
+
+    $('l-payment').textContent = formatCurrency(r.monthlyPayment);
+    $('l-payoff').textContent = `${years} yr${years !== 1 ? 's' : ''} ${months} mo`;
+    $('l-interest').textContent = formatCurrency(r.totalInterest);
+    $('l-paid').textContent = formatCurrency(r.totalPaid);
+    result.hidden = false;
+
+    const tbl = $('l-schedule');
+    if (tbl) {
+      const head =
+        '<thead><tr><th>#</th><th>Payment</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead>';
+      const rows = r.schedule
+        .map(
+          (s) =>
+            `<tr><td>${s.month}</td><td>${formatCurrency(s.payment)}</td><td>${formatCurrency(
+              s.principal,
+            )}</td><td>${formatCurrency(s.interest)}</td><td>${formatCurrency(s.balance)}</td></tr>`,
+        )
+        .join('');
+      tbl.innerHTML = head + '<tbody>' + rows + '</tbody>';
+    }
+  }
+
+  form?.addEventListener('input', compute);
+  form?.addEventListener('submit', (e: Event) => {
+    e.preventDefault();
+    compute();
+  });
+  compute();
+</script>

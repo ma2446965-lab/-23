@@ -1,0 +1,138 @@
+<form id="mortgage-form" class="tool-form" novalidate>
+  <div class="field">
+    <label for="m-price">Home price ($)</label>
+    <input id="m-price" class="input" type="number" inputmode="decimal" min="0" step="1000" value="300000" />
+  </div>
+  <div class="field">
+    <label for="m-down">Down payment</label>
+    <div class="input-group">
+      <input id="m-down" class="input" type="number" inputmode="decimal" min="0" step="1000" value="60000" />
+      <select id="m-down-unit" class="select" aria-label="Down payment unit">
+        <option value="amount">$</option>
+        <option value="percent">%</option>
+      </select>
+    </div>
+  </div>
+  <div class="field">
+    <label for="m-rate">Annual interest rate (%)</label>
+    <input id="m-rate" class="input" type="number" inputmode="decimal" min="0" step="0.1" value="6.5" />
+  </div>
+  <div class="field">
+    <label for="m-term">Loan term</label>
+    <select id="m-term" class="select">
+      <option value="30">30 years</option>
+      <option value="20">20 years</option>
+      <option value="15">15 years</option>
+      <option value="10">10 years</option>
+    </select>
+  </div>
+  <details class="advanced">
+    <summary>Advanced options (taxes &amp; insurance)</summary>
+    <div class="field">
+      <label for="m-tax">Property tax / year ($)</label>
+      <input id="m-tax" class="input" type="number" inputmode="decimal" min="0" step="100" value="0" />
+    </div>
+    <div class="field">
+      <label for="m-ins">Home insurance / year ($)</label>
+      <input id="m-ins" class="input" type="number" inputmode="decimal" min="0" step="100" value="0" />
+    </div>
+    <div class="field">
+      <label for="m-pmi">PMI / year ($)</label>
+      <input id="m-pmi" class="input" type="number" inputmode="decimal" min="0" step="50" value="0" />
+    </div>
+    <div class="field">
+      <label for="m-hoa">HOA / month ($)</label>
+      <input id="m-hoa" class="input" type="number" inputmode="decimal" min="0" step="10" value="0" />
+    </div>
+  </details>
+  <div class="actions">
+    <button type="submit" class="btn btn-primary">Calculate</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="m-error" class="error-text" role="alert"></p>
+
+  <div id="m-result" class="result" aria-live="polite" hidden>
+    <dl>
+      <dt>Monthly payment (P&amp;I)</dt><dd id="m-pi"></dd>
+      <dt>Total monthly payment</dt><dd class="total" id="m-total"></dd>
+      <dt>Loan amount</dt><dd id="m-loan"></dd>
+      <dt>Down payment</dt><dd id="m-down-amt"></dd>
+      <dt>Total interest paid</dt><dd id="m-interest"></dd>
+      <dt>Total of all payments</dt><dd id="m-paid"></dd>
+    </dl>
+    <details>
+      <summary>Amortization schedule</summary>
+      <div class="table-wrap"><table id="m-schedule"></table></div>
+    </details>
+  </div>
+</form>
+
+<script>
+  import { calcMortgage } from '../../core/mortgage';
+  import { formatCurrency } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+  const form = $('mortgage-form');
+  const result = $('m-result');
+  const errorEl = $('m-error');
+
+  function compute() {
+    errorEl.textContent = '';
+    const price = parseFloat($('m-price')?.value ?? '');
+    const down = parseFloat($('m-down')?.value ?? '');
+    const rate = parseFloat($('m-rate')?.value ?? '');
+    const term = parseInt($('m-term')?.value ?? '30', 10);
+    const downUnit = $('m-down-unit')?.value;
+    const tax = parseFloat($('m-tax')?.value ?? '0') || 0;
+    const ins = parseFloat($('m-ins')?.value ?? '0') || 0;
+    const pmi = parseFloat($('m-pmi')?.value ?? '0') || 0;
+    const hoa = parseFloat($('m-hoa')?.value ?? '0') || 0;
+
+    if (![price, down, rate].every(Number.isFinite) || price <= 0) {
+      result.hidden = true;
+      errorEl.textContent = 'Please enter valid positive numbers.';
+      return;
+    }
+
+    const r = calcMortgage({
+      price,
+      downPayment: down,
+      downPaymentIsPercent: downUnit === 'percent',
+      annualRate: rate,
+      termYears: term,
+      propertyTaxYear: tax,
+      homeInsuranceYear: ins,
+      pmiYear: pmi,
+      hoaMonth: hoa,
+    });
+
+    $('m-pi').textContent = formatCurrency(r.monthlyPrincipalInterest);
+    $('m-total').textContent = formatCurrency(r.monthlyTotal);
+    $('m-loan').textContent = formatCurrency(r.loanAmount);
+    $('m-down-amt').textContent = formatCurrency(r.downPaymentAmount);
+    $('m-interest').textContent = formatCurrency(r.totalInterest);
+    $('m-paid').textContent = formatCurrency(r.totalPaid);
+    result.hidden = false;
+
+    const tbl = $('m-schedule');
+    if (tbl) {
+      const head =
+        '<thead><tr><th>#</th><th>Payment</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead>';
+      const rows = r.schedule
+        .map(
+          (s) =>
+            `<tr><td>${s.month}</td><td>${formatCurrency(s.payment)}</td><td>${formatCurrency(
+              s.principal,
+            )}</td><td>${formatCurrency(s.interest)}</td><td>${formatCurrency(s.balance)}</td></tr>`,
+        )
+        .join('');
+      tbl.innerHTML = head + '<tbody>' + rows + '</tbody>';
+    }
+  }
+
+  form?.addEventListener('input', compute);
+  form?.addEventListener('submit', (e: Event) => {
+    e.preventDefault();
+    compute();
+  });
+  compute();
+</script>

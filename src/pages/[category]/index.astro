@@ -1,0 +1,15 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { categories, getToolsByCategory } from '../../data/tools';
+import CategoryLayout from '../../layouts/CategoryLayout.astro';
+
+export const getStaticPaths = (() =>
+  categories.map((c) => ({
+    params: { category: c.slug },
+    props: { category: c, tools: getToolsByCategory(c.slug) },
+  }))) satisfies GetStaticPaths;
+
+const { category, tools } = Astro.props;
+---
+
+<CategoryLayout category={category} tools={tools} />

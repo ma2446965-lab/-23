@@ -1,0 +1,40 @@
+---
+import { ADSENSE_CLIENT, AD_SLOTS } from '../../consts';
+
+interface Props {
+  id?: keyof typeof AD_SLOTS | string;
+  label?: string;
+  class?: string;
+}
+
+const { id = 'top', label = 'Advertisement', class: className = '' } = Astro.props;
+const slotId = id in AD_SLOTS ? AD_SLOTS[id as keyof typeof AD_SLOTS] : String(id);
+const client = ADSENSE_CLIENT;
+---
+
+{
+  client ? (
+    <div class={`ad-slot ${className}`}>
+      <span class="ad-label">{label}</span>
+      <ins
+        class="adsbygoogle"
+        style="display:block"
+        data-ad-client={client}
+        data-ad-slot={slotId}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      >
+      </ins>
+      <script is:inline>
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </div>
+  ) : (
+    <div class={`ad-slot ${className}`} aria-hidden="true">
+      <div class="ad-placeholder">
+        <span>{label}</span>
+        <small>AdSense slot reserved — set PUBLIC_ADSENSE_CLIENT</small>
+      </div>
+    </div>
+  )
+}

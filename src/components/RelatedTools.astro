@@ -1,0 +1,20 @@
+---
+import type { ToolMeta } from '../data/types';
+
+interface Props {
+  tools: ToolMeta[];
+}
+const { tools } = Astro.props;
+---
+
+<div class="grid-tools">
+  {
+    tools.map((t) => (
+      <a class="card tool-card" href={`/${t.category}/${t.slug}/`}>
+        <span class="badge">{t.category}</span>
+        <h3>{t.title}</h3>
+        <p>{t.description}</p>
+      </a>
+    ))
+  }
+</div>

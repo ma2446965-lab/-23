@@ -1,0 +1,86 @@
+<form id="bmi-form" class="tool-form" novalidate>
+  <div class="field">
+    <label for="bmi-unit">Units</label>
+    <select id="bmi-unit" class="select">
+      <option value="metric" selected>Metric (kg, cm)</option>
+      <option value="imperial">Imperial (lb, in)</option>
+    </select>
+  </div>
+
+  <div class="input-row">
+    <div class="field" id="bmi-weight-field">
+      <label for="bmi-weight">Weight (kg)</label>
+      <input id="bmi-weight" class="input" type="number" inputmode="decimal" min="0" step="0.1" value="70" />
+    </div>
+    <div class="field" id="bmi-height-field">
+      <label for="bmi-height">Height (cm)</label>
+      <input id="bmi-height" class="input" type="number" inputmode="decimal" min="0" step="0.1" value="175" />
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="btn btn-primary">Calculate</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="bmi-error" class="error-text" role="alert"></p>
+
+  <div id="bmi-result" class="result" aria-live="polite" hidden>
+    <dl>
+      <dt>BMI</dt><dd class="total" id="bmi-value"></dd>
+      <dt>Category</dt><dd id="bmi-cat"></dd>
+      <dt>Healthy weight range</dt><dd id="bmi-range"></dd>
+    </dl>
+  </div>
+</form>
+
+<script>
+  import { calcBmi } from '../../core/bmi';
+  import { formatNumber } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+  const form = $('bmi-form');
+  const result = $('bmi-result');
+  const errorEl = $('bmi-error');
+  const unitSel = $('bmi-unit');
+
+  function syncLabels() {
+    const imperial = unitSel?.value === 'imperial';
+    $('bmi-weight')?.setAttribute('step', '0.1');
+    document.querySelector('#bmi-weight-field label')!.textContent = imperial ? 'Weight (lb)' : 'Weight (kg)';
+    document.querySelector('#bmi-height-field label')!.textContent = imperial ? 'Height (in)' : 'Height (cm)';
+  }
+
+  function compute() {
+    errorEl.textContent = '';
+    const unit = unitSel?.value === 'imperial' ? 'imperial' : 'metric';
+    const weight = parseFloat($('bmi-weight')?.value ?? '');
+    const height = parseFloat($('bmi-height')?.value ?? '');
+
+    if (![weight, height].every(Number.isFinite) || weight <= 0 || height <= 0) {
+      result.hidden = true;
+      errorEl.textContent = 'Please enter valid positive values.';
+      return;
+    }
+
+    const r = calcBmi({ weight, height, unit });
+    $('bmi-value').textContent = formatNumber(r.bmi, 'en-US', 1);
+    $('bmi-cat').textContent = r.category;
+    $('bmi-range').textContent = `${formatNumber(r.healthyMin, 'en-US', 1)} – ${formatNumber(
+      r.healthyMax,
+      'en-US',
+      1,
+    )} ${unit === 'imperial' ? 'lb' : 'kg'}`;
+    result.hidden = false;
+  }
+
+  unitSel?.addEventListener('change', () => {
+    syncLabels();
+    compute();
+  });
+  form?.addEventListener('input', compute);
+  form?.addEventListener('submit', (e: Event) => {
+    e.preventDefault();
+    compute();
+  });
+  syncLabels();
+  compute();
+</script>

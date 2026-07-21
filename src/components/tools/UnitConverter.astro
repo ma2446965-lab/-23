@@ -1,0 +1,86 @@
+<form id="uc-form" class="tool-form" novalidate>
+  <div class="field">
+    <label for="uc-cat">Category</label>
+    <select id="uc-cat" class="select">
+      <option value="length">Length</option>
+      <option value="weight">Weight / Mass</option>
+      <option value="area">Area</option>
+      <option value="volume">Volume</option>
+      <option value="speed">Speed</option>
+    </select>
+  </div>
+  <div class="input-row">
+    <div class="field">
+      <label for="uc-from">From</label>
+      <select id="uc-from" class="select"></select>
+    </div>
+    <div class="field">
+      <label for="uc-to">To</label>
+      <select id="uc-to" class="select"></select>
+    </div>
+  </div>
+  <div class="field">
+    <label for="uc-val">Value</label>
+    <input id="uc-val" class="input" type="number" inputmode="decimal" step="any" value="1" />
+  </div>
+  <div class="actions">
+    <button type="button" id="uc-swap" class="btn btn-ghost">Swap units</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="uc-error" class="error-text" role="alert"></p>
+
+  <div id="uc-result" class="result" aria-live="polite" hidden>
+    <dl><dt>Converted value</dt><dd class="total" id="uc-out"></dd></dl>
+  </div>
+</form>
+
+<script>
+  import { UNIT_DEFINITIONS, UNIT_LABELS, listUnits, convertUnit } from '../../core/unit-converter';
+  import { formatNumber } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+  const catSel = $('uc-cat');
+  const fromSel = $('uc-from');
+  const toSel = $('uc-to');
+  const valIn = $('uc-val');
+  const result = $('uc-result');
+  const errorEl = $('uc-error');
+
+  function populate() {
+    const cat = catSel?.value ?? 'length';
+    const units = listUnits(cat as keyof typeof UNIT_DEFINITIONS);
+    const opts = units
+      .map((u) => `<option value="${u}">${UNIT_LABELS[u] ?? u}</option>`)
+      .join('');
+    if (fromSel) fromSel.innerHTML = opts;
+    if (toSel) toSel.innerHTML = opts;
+    if (toSel && units.length > 1) toSel.selectedIndex = 1;
+  }
+
+  function compute() {
+    errorEl.textContent = '';
+    const v = parseFloat(valIn?.value ?? '');
+    if (!Number.isFinite(v)) {
+      result.hidden = true;
+      return;
+    }
+    const out = convertUnit(v, catSel?.value as any, fromSel?.value ?? '', toSel?.value ?? '');
+    $('uc-out').textContent = `${formatNumber(v)} ${fromSel?.value} = ${formatNumber(out)} ${toSel?.value}`;
+    result.hidden = false;
+  }
+
+  $('uc-swap')?.addEventListener('click', () => {
+    const tmp = fromSel?.value;
+    if (fromSel) fromSel.value = toSel?.value ?? '';
+    if (toSel) toSel.value = tmp ?? '';
+    compute();
+  });
+  catSel?.addEventListener('change', () => {
+    populate();
+    compute();
+  });
+  valIn?.addEventListener('input', compute);
+  fromSel?.addEventListener('change', compute);
+  toSel?.addEventListener('change', compute);
+  populate();
+  compute();
+</script>

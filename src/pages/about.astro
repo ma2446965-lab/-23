@@ -1,0 +1,47 @@
+---
+import { SITE } from '../consts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AdSlot from '../components/ads/AdSlot.astro';
+---
+
+<BaseLayout
+  title="About"
+  description={`About ${SITE.name} — free, fast and private online calculators, converters and generators that run entirely in your browser.`}
+>
+  <div class="container" style="max-width: 760px; padding: 2rem 1.25rem 3rem;">
+    <h1>About {SITE.name}</h1>
+    <section class="prose">
+      <p>
+        {SITE.name} is a collection of free, fast and private online tools — calculators, converters
+        and generators — built to do one thing well: give you an accurate answer in seconds, on any
+        device, without asking you to sign up or hand over personal data.
+      </p>
+
+      <h2>How it works</h2>
+      <p>
+        Almost every tool runs entirely in your browser (client-side). Your inputs are never sent to
+        a server, which means calculations are instant and your data stays on your device. There are
+        no accounts, no trackers, and no paywalls.
+      </p>
+
+      <h2>Why we built it</h2>
+      <p>
+        Most calculator sites are cluttered, slow, or buried in ads. We designed {SITE.name} to be
+        clean, accessible and exceptionally fast, with a strong focus on search-engine best practices
+        and Core Web Vitals so the page is ready the moment you need it.
+      </p>
+
+      <h2>Accuracy &amp; responsibility</h2>
+      <p>
+        Our calculators provide estimates for educational and planning purposes. They are not a
+        substitute for professional financial, tax, legal or medical advice. Always verify important
+        decisions with a qualified professional.
+      </p>
+
+      <h2>Get in touch</h2>
+      <p>Questions, corrections or tool requests? Visit our <a href="/contact/">contact page</a>.</p>
+    </section>
+
+    <AdSlot id="inContent" label="Advertisement" />
+  </div>
+</BaseLayout>

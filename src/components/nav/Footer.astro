@@ -1,0 +1,94 @@
+---
+import { SITE } from '../../consts';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="footer-col">
+      <strong>{SITE.name}</strong>
+      <p>{SITE.tagline}.</p>
+      <p class="muted">100% free. No sign-up. No tracking.</p>
+    </div>
+    <nav class="footer-col" aria-label="Tools">
+      <h4>Tools</h4>
+      <ul>
+        <li><a href="/calculators/">Calculators</a></li>
+        <li><a href="/converters/">Converters</a></li>
+        <li><a href="/generators/">Generators</a></li>
+      </ul>
+    </nav>
+    <nav class="footer-col" aria-label="Company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/contact/">Contact</a></li>
+        <li><a href="/privacy/">Privacy Policy</a></li>
+        <li><a href="/terms/">Terms of Service</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="container footer-bottom">
+    <p>&copy; {year} {SITE.name}. All rights reserved.</p>
+    <p class="muted">Calculators provide estimates only and are not financial, tax, or legal advice.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 4rem;
+    background: var(--color-ink-900);
+    color: var(--color-ink-200);
+    padding: 2.5rem 0 1.5rem;
+  }
+  .site-footer a {
+    color: var(--color-ink-200);
+    text-decoration: none;
+  }
+  .site-footer a:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
+  .site-footer__inner {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 2rem;
+  }
+  .footer-col h4 {
+    color: #fff;
+    margin: 0 0 0.6rem;
+    font-size: 0.95rem;
+  }
+  .footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .footer-col strong {
+    color: #fff;
+    font-size: 1.05rem;
+  }
+  .muted {
+    color: var(--color-ink-400);
+    font-size: 0.85rem;
+  }
+  .footer-bottom {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-ink-800);
+    font-size: 0.82rem;
+    color: var(--color-ink-400);
+  }
+  .footer-bottom p {
+    margin: 0.2rem 0;
+  }
+  @media (max-width: 640px) {
+    .site-footer__inner {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+</style>

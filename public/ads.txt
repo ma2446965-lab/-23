@@ -1,0 +1,14 @@
+# ads.txt — Authorized Digital Sellers
+# ---------------------------------------------------------------------------
+# REQUIRED for Google AdSense. Replace the placeholder below with the line
+# Google provides after your account is approved.
+#
+# Format: google.com, <your-publisher-id>, <account-type>, <certification-authority>
+# Example (do NOT use this real value):
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+#
+# Until you have a real AdSense account, leave this file as-is; the site will
+# simply show reserved placeholder ad slots (no external requests).
+# ---------------------------------------------------------------------------
+
+# google.com, pub-REPLACE-WITH-YOUR-PUB-ID, DIRECT, f08c47fec0942fa0

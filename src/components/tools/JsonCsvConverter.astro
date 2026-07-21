@@ -1,0 +1,63 @@
+<form id="jc-form" class="tool-form" novalidate>
+  <div class="field">
+    <label for="jc-dir">Conversion</label>
+    <select id="jc-dir" class="select">
+      <option value="toCsv" selected>JSON → CSV</option>
+      <option value="toJson">CSV → JSON</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="jc-in">Input</label>
+    <textarea id="jc-in" class="input" spellcheck="false"></textarea>
+  </div>
+  <div class="field">
+    <label for="jc-out">Output</label>
+    <textarea id="jc-out" class="input" readonly spellcheck="false"></textarea>
+  </div>
+  <div class="actions">
+    <button type="button" id="jc-convert" class="btn btn-primary">Convert</button>
+    <button type="button" id="jc-copy" class="btn btn-ghost copy-btn">Copy output</button>
+  </div>
+  <p id="jc-error" class="error-text" role="alert"></p>
+</form>
+
+<script>
+  import { jsonToCsv, csvToJson } from '../../core/json-csv';
+  import { $ } from '../../lib/dom';
+  const dirSel = $('jc-dir');
+  const inEl = $('jc-in') as HTMLTextAreaElement;
+  const outEl = $('jc-out') as HTMLTextAreaElement;
+  const errorEl = $('jc-error');
+
+  const SAMPLE = '[\n  { "name": "Alice", "score": 92 },\n  { "name": "Bob", "score": 85 }\n]';
+  if (inEl && !inEl.value) inEl.value = SAMPLE;
+
+  function convert() {
+    errorEl.textContent = '';
+    try {
+      if (dirSel?.value === 'toCsv') {
+        const data = JSON.parse(inEl.value);
+        outEl.value = jsonToCsv(data);
+      } else {
+        const data = csvToJson(inEl.value);
+        outEl.value = JSON.stringify(data, null, 2);
+      }
+    } catch (e) {
+      errorEl.textContent = 'Invalid input: ' + (e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  $('jc-convert')?.addEventListener('click', convert);
+  dirSel?.addEventListener('change', convert);
+  $('jc-copy')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(outEl.value);
+      const btn = $('jc-copy');
+      if (btn) btn.textContent = 'Copied!';
+      setTimeout(() => btn && (btn.textContent = 'Copy output'), 1500);
+    } catch {
+      /* clipboard may be unavailable */
+    }
+  });
+  convert();
+</script>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <rect x="0" y="0" width="1200" height="14" fill="#4f46e5"/>
+  <g transform="translate(80,210)">
+    <rect width="96" height="96" rx="22" fill="#4f46e5"/>
+    <path d="M30 66V30h11c9 0 14.5 5.4 14.5 13.5S50 57 41 57H36v9zm9-16.5h1.8c3.9 0 6.2-2.2 6.2-6s-2.3-6-6.2-6H39z" fill="#fff"/>
+    <circle cx="72" cy="36" r="9" fill="#a5b4fc"/>
+  </g>
+  <text x="80" y="360" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="78" font-weight="800">CalcUtils</text>
+  <text x="82" y="430" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="34">Free calculators, converters</text>
+  <text x="82" y="478" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="34">&amp; generators — fast &amp; private.</text>
+</svg>

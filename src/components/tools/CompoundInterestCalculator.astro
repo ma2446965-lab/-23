@@ -1,0 +1,103 @@
+<form id="ci-form" class="tool-form" novalidate>
+  <div class="field">
+    <label for="ci-principal">Initial principal ($)</label>
+    <input id="ci-principal" class="input" type="number" inputmode="decimal" min="0" step="100" value="1000" />
+  </div>
+  <div class="field">
+    <label for="ci-monthly">Monthly contribution ($)</label>
+    <input id="ci-monthly" class="input" type="number" inputmode="decimal" min="0" step="50" value="100" />
+  </div>
+  <div class="field">
+    <label for="ci-rate">Annual interest rate (%)</label>
+    <input id="ci-rate" class="input" type="number" inputmode="decimal" min="0" step="0.1" value="6" />
+  </div>
+  <div class="field">
+    <label for="ci-years">Number of years</label>
+    <input id="ci-years" class="input" type="number" inputmode="decimal" min="1" step="1" value="10" />
+  </div>
+  <div class="field">
+    <label for="ci-freq">Compounding frequency</label>
+    <select id="ci-freq" class="select">
+      <option value="1">Annually</option>
+      <option value="4">Quarterly</option>
+      <option value="12" selected>Monthly</option>
+      <option value="365">Daily</option>
+    </select>
+  </div>
+  <div class="actions">
+    <button type="submit" class="btn btn-primary">Calculate</button>
+    <button type="reset" class="btn btn-ghost">Reset</button>
+  </div>
+  <p id="ci-error" class="error-text" role="alert"></p>
+
+  <div id="ci-result" class="result" aria-live="polite" hidden>
+    <dl>
+      <dt>Future value</dt><dd class="total" id="ci-fv"></dd>
+      <dt>Total contributions</dt><dd id="ci-contrib"></dd>
+      <dt>Total interest earned</dt><dd id="ci-interest"></dd>
+    </dl>
+    <details>
+      <summary>Year-by-year breakdown</summary>
+      <div class="table-wrap"><table id="ci-table"></table></div>
+    </details>
+  </div>
+</form>
+
+<script>
+  import { calcCompoundInterest } from '../../core/compound-interest';
+  import { formatCurrency } from '../../lib/format';
+  import { $ } from '../../lib/dom';
+  const form = $('ci-form');
+  const result = $('ci-result');
+  const errorEl = $('ci-error');
+
+  function compute() {
+    errorEl.textContent = '';
+    const principal = parseFloat($('ci-principal')?.value ?? '');
+    const monthly = parseFloat($('ci-monthly')?.value ?? '');
+    const rate = parseFloat($('ci-rate')?.value ?? '');
+    const years = parseFloat($('ci-years')?.value ?? '');
+    const freq = parseInt($('ci-freq')?.value ?? '12', 10);
+
+    if (![principal, monthly, rate, years].every(Number.isFinite) || years <= 0) {
+      result.hidden = true;
+      errorEl.textContent = 'Please enter valid positive numbers.';
+      return;
+    }
+
+    const r = calcCompoundInterest({
+      principal,
+      monthlyContribution: monthly,
+      annualRate: rate,
+      years,
+      compoundsPerYear: freq,
+    });
+
+    $('ci-fv').textContent = formatCurrency(r.futureValue);
+    $('ci-contrib').textContent = formatCurrency(r.totalContributions);
+    $('ci-interest').textContent = formatCurrency(r.totalInterest);
+    result.hidden = false;
+
+    const tbl = $('ci-table');
+    if (tbl) {
+      const head =
+        '<thead><tr><th>Year</th><th>Contributions</th><th>Interest</th><th>Balance</th></tr></thead>';
+      const rows = r.byYear
+        .map(
+          (y) =>
+            `<tr><td>${y.year}</td><td>${formatCurrency(y.contributions)}</td><td>${formatCurrency(
+              y.interest,
+            )}</td><td>${formatCurrency(y.balance)}</td></tr>`,
+        )
+        .join('');
+      tbl.innerHTML = head + '<tbody>' + rows + '</tbody>';
+    }
+  }
+
+  form?.addEventListener('input', compute);
+  form?.addEventListener('submit', (e: Event) => {
+    e.preventDefault();
+    compute();
+  });
+  compute();
+</script>

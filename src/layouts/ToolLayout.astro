@@ -1,0 +1,143 @@
+---
+import { SITE } from '../consts';
+import type { ToolMeta } from '../data/types';
+import { categories, getTool } from '../data/tools';
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import RelatedTools from '../components/RelatedTools.astro';
+import AdSlot from '../components/ads/AdSlot.astro';
+import { softwareAppJsonLd, faqJsonLd, breadcrumbJsonLd } from '../lib/seo';
+
+interface Props {
+  tool: ToolMeta;
+}
+const { tool } = Astro.props;
+
+const cat = categories.find((c) => c.slug === tool.category)!;
+const related = tool.related.map(getTool).filter(Boolean) as ToolMeta[];
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: cat.title, href: `/${cat.slug}/` },
+  { name: tool.title, href: `/${cat.slug}/${tool.slug}/` },
+];
+
+const jsonLd = [
+  softwareAppJsonLd(tool),
+  faqJsonLd(tool.faq),
+  breadcrumbJsonLd(
+    crumbs.map((c) => ({ name: c.name, url: `${SITE.url}${c.href}` })),
+  ),
+];
+---
+
+<BaseLayout
+  title={tool.title}
+  description={tool.description}
+  ogType="article"
+  jsonLd={jsonLd}
+>
+  <div class="container tool-page">
+    <Breadcrumbs items={crumbs} />
+
+    <header class="tool-header">
+      <h1>{tool.title}</h1>
+      <p class="lead">{tool.description}</p>
+    </header>
+
+    <AdSlot id="top" label="Advertisement" />
+
+    <section class="tool-interactive card" aria-label={tool.title}>
+      <slot />
+    </section>
+
+    <AdSlot id="inContent" label="Advertisement" />
+
+    <section class="prose tool-content">
+      <h2>About this {tool.title}</h2>
+      <p>{tool.content.intro}</p>
+
+      <h2>How to use</h2>
+      <ol>
+        {tool.content.howTo.map((step) => <li>{step}</li>)}
+      </ol>
+
+      {
+        tool.content.example && (
+          <>
+            <h2>Example</h2>
+            <p>{tool.content.example}</p>
+          </>
+        )
+      }
+
+      {
+        tool.content.assumptions && tool.content.assumptions.length > 0 && (
+          <>
+            <h2>Assumptions &amp; limitations</h2>
+            <ul>
+              {tool.content.assumptions.map((a) => (
+                <li>{a}</li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </section>
+
+    <AdSlot id="related" label="Advertisement" />
+
+    {
+      related.length > 0 && (
+        <section class="related">
+          <h2>Related tools</h2>
+          <RelatedTools tools={related} />
+        </section>
+      )
+    }
+
+    <section class="prose faq">
+      <h2>Frequently asked questions</h2>
+      {
+        tool.faq.map((f) => (
+          <div class="faq-item">
+            <h3>{f.q}</h3>
+            <p>{f.a}</p>
+          </div>
+        ))
+      }
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .tool-page {
+    padding-top: 1.25rem;
+    padding-bottom: 2rem;
+  }
+  .tool-header {
+    margin-bottom: 1.25rem;
+  }
+  .tool-header h1 {
+    font-size: clamp(1.7rem, 4vw, 2.4rem);
+    margin: 0.4rem 0 0.5rem;
+  }
+  .lead {
+    font-size: 1.05rem;
+    color: var(--color-ink-600);
+    margin: 0;
+    max-width: 70ch;
+  }
+  .tool-interactive {
+    padding: 1.4rem;
+  }
+  .tool-content {
+    margin-top: 1.75rem;
+  }
+  .related {
+    margin-top: 2rem;
+  }
+  .faq {
+    margin-top: 2rem;
+  }
+</style>
