@@ -1,0 +1,37 @@
+---
+import { categories, getToolsByCategory } from '../data/tools';
+const path = Astro.url.pathname;
+---
+
+<aside class="sidebar" id="sidebar" aria-label="Site navigation">
+  <nav class="sidebar__nav">
+    {
+      categories.map((cat) => (
+        <section class="side-group">
+          <p class="side-group__title">
+            <span class="side-group__icon" aria-hidden="true">{cat.icon}</span>
+            <span data-i18n={`cat.${cat.slug}`} data-en={cat.title}>{cat.title}</span>
+          </p>
+          <ul class="side-group__list">
+            {
+              getToolsByCategory(cat.slug).map((t) => (
+                <li>
+                  <a
+                    href={`/${t.category}/${t.slug}/`}
+                    class="side-link"
+                    aria-current={path === `/${t.category}/${t.slug}/` ? 'page' : undefined}
+                  >
+                    <span class="side-link__icon" aria-hidden="true">{t.icon}</span>
+                    <span class="side-link__label" data-i18n={`tool.${t.slug}.title`} data-en={t.title}>
+                      {t.title}
+                    </span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      ))
+    }
+  </nav>
+</aside>

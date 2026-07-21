@@ -2,6 +2,7 @@
 import { SITE, ADSENSE_CLIENT } from '../consts';
 import SeoHead from '../components/seo/SeoHead.astro';
 import Header from '../components/nav/Header.astro';
+import Sidebar from '../components/Sidebar.astro';
 import Footer from '../components/nav/Footer.astro';
 
 interface Props {
@@ -89,10 +90,14 @@ const ssrDir = 'ltr';
   <body>
     <a href="#main" class="skip-link">Skip to content</a>
     <Header />
-    <main id="main">
-      <slot />
-    </main>
-    <Footer />
+    <div class="shell">
+      <Sidebar />
+      <div class="shell__main">
+        <main id="main"><slot /></main>
+        <Footer />
+      </div>
+    </div>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
     {/* Client i18n engine: wires the language switcher + theme toggle and
         applies translations on load and on every locale change. */}
