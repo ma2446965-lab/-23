@@ -6,26 +6,24 @@ import ThemeToggle from '../ThemeToggle.astro';
 
 <header class="site-header">
   <div class="container site-header__inner">
-    <div class="header-left">
+    <a href="/" class="brand" aria-label={`${SITE.name} home`}>
+      <span class="brand__logo" aria-hidden="true">C</span>
+      <span class="brand__name">{SITE.name}</span>
+    </a>
+
+    <div class="header-actions">
+      <LangSwitcher />
+      <ThemeToggle />
       <button
         class="nav-toggle"
         id="sidebar-toggle"
         type="button"
         aria-expanded="false"
         aria-controls="sidebar"
-        aria-label="Toggle menu"
+        aria-label="Menu"
       >
         <span></span><span></span><span></span>
       </button>
-      <a href="/" class="brand" aria-label={`${SITE.name} home`}>
-        <span class="brand__grad brand__logo" aria-hidden="true">C</span>
-        <span>{SITE.name}</span>
-      </a>
-    </div>
-
-    <div class="header-actions">
-      <LangSwitcher />
-      <ThemeToggle />
     </div>
   </div>
 </header>
@@ -34,18 +32,24 @@ import ThemeToggle from '../ThemeToggle.astro';
   const toggle = document.getElementById('sidebar-toggle');
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
-  function setOpen(open: boolean) {
+
+  function closeNav() {
+    sidebar?.classList.remove('is-open');
+    overlay?.classList.remove('is-open');
+    toggle?.setAttribute('aria-expanded', 'false');
+  }
+
+  toggle?.addEventListener('click', () => {
+    const open = !sidebar?.classList.contains('is-open');
     sidebar?.classList.toggle('is-open', open);
     overlay?.classList.toggle('is-open', open);
     toggle?.setAttribute('aria-expanded', String(open));
-  }
-  toggle?.addEventListener('click', () => setOpen(!sidebar?.classList.contains('is-open')));
-  overlay?.addEventListener('click', () => setOpen(false));
+  });
+  overlay?.addEventListener('click', closeNav);
   sidebar?.querySelectorAll('.side-link').forEach((l) =>
-    l.addEventListener('click', () => setOpen(false)),
+    l.addEventListener('click', closeNav),
   );
-  // Close drawer on Escape.
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') setOpen(false);
+    if (e.key === 'Escape') closeNav();
   });
 </script>

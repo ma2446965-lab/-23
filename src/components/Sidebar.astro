@@ -1,13 +1,39 @@
 ---
 import { categories, getToolsByCategory } from '../data/tools';
+
 const path = Astro.url.pathname;
+
+const pages = [
+  { href: '/', label: 'Home', icon: '🏠', key: 'nav.home' },
+  { href: '/about/', label: 'About', icon: 'ℹ️', key: 'nav.about' },
+  { href: '/contact/', label: 'Contact', icon: '✉️', key: 'nav.contact' },
+  { href: '/privacy/', label: 'Privacy Policy', icon: '🔒', key: 'footer.companyPrivacy' },
+  { href: '/terms/', label: 'Terms of Service', icon: '📄', key: 'footer.companyTerms' },
+];
 ---
 
 <aside class="sidebar" id="sidebar" aria-label="Site navigation">
+  <div class="sidebar__search">
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="7"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input
+      type="text"
+      id="sidebar-search"
+      class="sidebar__search-input"
+      placeholder=""
+      data-i18n-attr="placeholder:sidebar.search"
+      aria-label="Search tools"
+      autocomplete="off"
+      spellcheck="false"
+    />
+  </div>
+
   <nav class="sidebar__nav">
     {
       categories.map((cat) => (
-        <section class="side-group">
+        <section class="side-group" data-group>
           <p class="side-group__title">
             <span class="side-group__icon" aria-hidden="true">{cat.icon}</span>
             <span data-i18n={`cat.${cat.slug}`} data-en={cat.title}>{cat.title}</span>
@@ -33,5 +59,59 @@ const path = Astro.url.pathname;
         </section>
       ))
     }
+
+    <section class="side-group" data-group>
+      <p class="side-group__title">
+        <span class="side-group__icon" aria-hidden="true">📑</span>
+        <span data-i18n="nav.pages" data-en="Pages">Pages</span>
+      </p>
+      <ul class="side-group__list">
+        {
+          pages.map((p) => (
+            <li>
+              <a
+                href={p.href}
+                class="side-link"
+                aria-current={path === p.href ? 'page' : undefined}
+              >
+                <span class="side-link__icon" aria-hidden="true">{p.icon}</span>
+                <span class="side-link__label" data-i18n={p.key} data-en={p.label}>{p.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <p class="sidebar__empty" id="sidebar-empty" hidden>No tools found</p>
   </nav>
 </aside>
+
+<script>
+  // Sidebar quick search — filters every link (tools + pages) and hides
+  // empty category groups so the visitor can jump to any tool instantly.
+  const input = document.getElementById('sidebar-search') as HTMLInputElement | null;
+  const empty = document.getElementById('sidebar-empty');
+  const links = Array.from(document.querySelectorAll<HTMLElement>('#sidebar .side-link'));
+  const groups = Array.from(document.querySelectorAll<HTMLElement>('#sidebar [data-group]'));
+
+  function filterSidebar() {
+    const q = (input?.value || '').trim().toLowerCase();
+    let visible = 0;
+    for (const link of links) {
+      const text = (link.textContent || '').toLowerCase();
+      const match = !q || text.includes(q);
+      link.parentElement && (link.parentElement.hidden = !match);
+      if (match) visible++;
+    }
+    for (const group of groups) {
+      const anyVisible = Array.from(
+        group.querySelectorAll<HTMLElement>('.side-link'),
+      ).some((l) => !l.parentElement?.hidden);
+      group.hidden = !anyVisible;
+    }
+    if (empty) empty.hidden = visible !== 0;
+  }
+
+  input?.addEventListener('input', filterSidebar);
+</script>

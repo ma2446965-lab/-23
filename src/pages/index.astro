@@ -13,28 +13,64 @@ const jsonLd = [websiteJsonLd()];
 <BaseLayout title={SITE.name} description={SITE.description} jsonLd={jsonLd}>
   <div class="container home">
     <section class="hero">
-      <span class="hero__eyebrow">⚡ {SITE.name} · 34+ Free Tools</span>
-      <h1>
-        <span class="gradient-text" data-i18n="footer.tagline" data-en={SITE.tagline}>{SITE.tagline}</span>
+      <span class="hero__eyebrow">
+        <span class="hero__eyebrow-dot" aria-hidden="true"></span>
+        <span data-i18n="home.heroEyebrow" data-en="Free tools for everyone">Free tools for everyone</span>
+      </span>
+
+      <h1 class="hero__title">
+        <span class="gradient-text" data-i18n="home.heroTitle" data-en="Calculate, Convert & Create — All in One Place">
+          Calculate, Convert &amp; Create — All in One Place
+        </span>
       </h1>
-      <p class="lead">{SITE.description}</p>
+
+      <p class="hero__lead" data-i18n="home.heroSubtitle" data-en="CalcUtils gives you 34 free calculators, converters and generators that run instantly in your browser. No sign-up, no tracking — just fast, accurate results.">
+        CalcUtils gives you 34 free calculators, converters and generators that run instantly in your browser. No sign-up, no tracking — just fast, accurate results.
+      </p>
+
+      <form class="hero__search" id="hero-search-form" role="search" autocomplete="off">
+        <svg class="hero__search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          id="hero-search"
+          class="hero__search-input"
+          placeholder=""
+          data-i18n-attr="placeholder:home.heroSearch"
+          aria-label="Search tools"
+          spellcheck="false"
+        />
+        <div class="hero__results" id="hero-results" role="listbox" hidden></div>
+      </form>
+
       <div class="hero__cta">
-        <a href="/calculators/" class="btn btn-primary" data-i18n="btn.browse" data-en="Browse all tools">
-          Browse all tools →
-        </a>
+        <a href="#tools" class="btn btn-primary" data-i18n="home.startNow" data-en="Start now">Start now</a>
+        <a href="/calculators/" class="btn btn-ghost" data-i18n="btn.browse" data-en="Browse all tools">Browse all tools →</a>
       </div>
+
       <div class="hero__stats">
-        <div><b>34</b> Free tools</div>
-        <div><b>18</b> Languages</div>
-        <div><b>100%</b> Client-side</div>
+        <div class="hero__stat">
+          <b>34</b>
+          <span data-i18n="home.statTools" data-en="Free tools">Free tools</span>
+        </div>
+        <div class="hero__stat">
+          <b>18</b>
+          <span data-i18n="home.statLanguages" data-en="Languages">Languages</span>
+        </div>
+        <div class="hero__stat">
+          <b>100%</b>
+          <span data-i18n="home.statClient" data-en="Client-side">Client-side</span>
+        </div>
       </div>
     </section>
 
     <AdSlot id="top" label="Advertisement" />
 
     {
-      categories.map((cat) => (
-        <section class="cat-section">
+      categories.map((cat, i) => (
+        <section class="cat-section" id={i === 0 ? 'tools' : undefined}>
           <div class="cat-head">
             <h2>
               <span class="cat-icon" aria-hidden="true">{cat.icon}</span>{' '}
@@ -56,9 +92,62 @@ const jsonLd = [websiteJsonLd()];
   </div>
 </BaseLayout>
 
-<style>
-  .home { padding-top: 1rem; padding-bottom: 2rem; }
-  .hero__eyebrow { display: inline-flex; }
-  .cat-section { margin-top: 2.5rem; }
-  .featured { margin-top: 2.75rem; }
-</style>
+<script>
+  // Hero command-palette: builds live results from the already-rendered,
+  // already-localized tool cards so search matches the visitor's language.
+  const input = document.getElementById('hero-search') as HTMLInputElement | null;
+  const results = document.getElementById('hero-results');
+  const form = document.getElementById('hero-search-form');
+
+  // Read the (already-localized) DOM on every keystroke so search matches
+  // the visitor's current language, not just the initial render.
+  function getCards() {
+    return Array.from(document.querySelectorAll<HTMLElement>('.tool-card')).map((card) => {
+      const link = card as HTMLAnchorElement;
+      const title = card.querySelector('h3')?.textContent?.trim() || '';
+      const icon = card.querySelector('.tool-card__icon')?.textContent?.trim() || '🔧';
+      return { title, href: link.getAttribute('href') || '#', icon };
+    });
+  }
+
+  function render(q: string) {
+    if (!results) return;
+    const query = q.trim().toLowerCase();
+    if (!query) {
+      results.hidden = true;
+      results.innerHTML = '';
+      return;
+    }
+    const matches = getCards().filter((c) => c.title.toLowerCase().includes(query)).slice(0, 8);
+    if (!matches.length) {
+      results.innerHTML = `<p class="hero__results-empty">No tools found</p>`;
+      results.hidden = false;
+      return;
+    }
+    results.innerHTML = matches
+      .map(
+        (c) =>
+          `<a class="hero__result" href="${c.href}" role="option">` +
+          `<span class="hero__result-icon" aria-hidden="true">${c.icon}</span>` +
+          `<span class="hero__result-title">${c.title}</span></a>`,
+      )
+      .join('');
+    results.hidden = false;
+  }
+
+  input?.addEventListener('input', () => render(input.value));
+  input?.addEventListener('focus', () => render(input.value));
+  document.addEventListener('click', (e) => {
+    if (form && !form.contains(e.target as Node)) {
+      if (results) results.hidden = true;
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && results) results.hidden = true;
+  });
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const first = results?.querySelector('a');
+    if (first) (first as HTMLAnchorElement).click();
+  });
+</script>
