@@ -10,15 +10,14 @@ interface Props {
   tools: ToolMeta[];
 }
 const { category, tools } = Astro.props;
+const slug = category.slug;
 
 const crumbs = [
-  { name: 'Home', href: '/' },
-  { name: category.title, href: `/${category.slug}/` },
+  { name: 'Home', href: '/', i18nKey: 'breadcrumb.home' },
+  { name: category.title, href: `/${category.slug}/`, i18nKey: `cat.${slug}` },
 ];
 
-const jsonLd = [
-  breadcrumbJsonLd(crumbs.map((c) => ({ name: c.name, url: `${SITE.url}${c.href}` }))),
-];
+const jsonLd = [breadcrumbJsonLd(crumbs.map((c) => ({ name: c.name, url: `${SITE.url}${c.href}` })))];
 ---
 
 <BaseLayout
@@ -30,20 +29,19 @@ const jsonLd = [
     <Breadcrumbs items={crumbs} />
 
     <header class="category-header">
-      <h1>{category.title}</h1>
-      <p class="lead">{category.description}</p>
+      <h1 data-i18n={`cat.${slug}`} data-en={category.title}>{category.title}</h1>
+      <p class="lead" data-i18n={`cat.${slug}.desc`} data-en={category.description}>{category.description}</p>
     </header>
 
     <section class="grid-tools">
-      {
-        tools.map((t) => (
-          <a class="card tool-card" href={`/${t.category}/${t.slug}/`}>
-            <span class="badge">{t.category}</span>
-            <h3>{t.title}</h3>
-            <p>{t.description}</p>
-          </a>
-        ))
-      }
+      {tools.map((t) => (
+        <a class="card tool-card" href={`/${t.category}/${t.slug}/`}>
+          <span class="tool-card__icon" aria-hidden="true">{t.icon}</span>
+          <span class="badge" data-i18n={`cat.${t.category}`} data-en={t.category}>{t.category}</span>
+          <h3 data-i18n={`tool.${t.slug}.title`} data-en={t.title}>{t.title}</h3>
+          <p data-i18n={`tool.${t.slug}.description`} data-en={t.description}>{t.description}</p>
+        </a>
+      ))}
     </section>
   </div>
 </BaseLayout>
@@ -58,7 +56,7 @@ const jsonLd = [
   }
   .lead {
     font-size: 1.05rem;
-    color: var(--color-ink-600);
+    color: var(--text-muted);
     margin: 0;
     max-width: 70ch;
   }

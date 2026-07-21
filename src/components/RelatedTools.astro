@@ -11,9 +11,10 @@ const { tools } = Astro.props;
   {
     tools.map((t) => (
       <a class="card tool-card" href={`/${t.category}/${t.slug}/`}>
-        <span class="badge">{t.category}</span>
-        <h3>{t.title}</h3>
-        <p>{t.description}</p>
+        <span class="tool-card__icon" aria-hidden="true">{t.icon}</span>
+        <span class="badge" data-i18n={`cat.${t.category}`} data-en={t.category}>{t.category}</span>
+        <h3 data-i18n={`tool.${t.slug}.title`} data-en={t.title}>{t.title}</h3>
+        <p data-i18n={`tool.${t.slug}.description`} data-en={t.description}>{t.description}</p>
       </a>
     ))
   }

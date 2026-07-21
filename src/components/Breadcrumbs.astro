@@ -2,6 +2,8 @@
 interface Crumb {
   name: string;
   href: string;
+  /** Optional i18n key; falls back to `name` (English) when absent. */
+  i18nKey?: string;
 }
 interface Props {
   items: Crumb[];
@@ -15,9 +17,9 @@ const { items } = Astro.props;
       <span class="crumb">
         {i > 0 && <span class="sep" aria-hidden="true">/</span>}
         {i < items.length - 1 ? (
-          <a href={c.href}>{c.name}</a>
+          <a href={c.href} data-i18n={c.i18nKey} data-en={c.name}>{c.name}</a>
         ) : (
-          <span aria-current="page">{c.name}</span>
+          <span aria-current="page" data-i18n={c.i18nKey} data-en={c.name}>{c.name}</span>
         )}
       </span>
     ))
@@ -30,6 +32,6 @@ const { items } = Astro.props;
   }
   .breadcrumbs .sep {
     margin: 0 0.4rem;
-    color: var(--color-ink-400);
+    color: var(--text-faint);
   }
 </style>

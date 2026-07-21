@@ -1,0 +1,30 @@
+---
+import { LANGUAGES } from '../i18n/config';
+const defaultLang = LANGUAGES[0]!; // English
+---
+
+<div class="lang-switcher">
+  <button
+    id="lang-button"
+    class="lang-button"
+    type="button"
+    aria-haspopup="true"
+    aria-expanded="false"
+    data-i18n-attr="aria-label:lang.label"
+  >
+    <span class="lang-button__flag">{defaultLang.flag}</span>
+    <span class="lang-button__name">{defaultLang.native}</span>
+    <span class="lang-button__caret" aria-hidden="true">▾</span>
+  </button>
+  <div id="lang-menu" class="lang-menu" role="menu" data-i18n-attr="aria-label:lang.select">
+    {
+      LANGUAGES.map((l) => (
+        <button class="lang-item" type="button" role="menuitem" data-lang={l.code}>
+          <span class="lang-item__flag" aria-hidden="true">{l.flag}</span>
+          <span class="lang-item__native">{l.native}</span>
+          <span class="lang-item__en">{l.english}</span>
+        </button>
+      ))
+    }
+  </div>
+</div>

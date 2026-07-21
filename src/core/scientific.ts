@@ -82,8 +82,8 @@ function toPostfix(tokens: string[]): string[] {
           stack[stack.length - 1] !== '(' &&
           stack[stack.length - 1]! in PRECEDENCE &&
           (RIGHT_ASSOC.has(op)
-            ? PRECEDENCE[stack[stack.length - 1]!]! > PRECEDENCE[op]
-            : PRECEDENCE[stack[stack.length - 1]!]! >= PRECEDENCE[op])
+            ? PRECEDENCE[stack[stack.length - 1]!]! > PRECEDENCE[op]!
+            : PRECEDENCE[stack[stack.length - 1]!]! >= PRECEDENCE[op]!)
         ) {
           output.push(stack.pop()!);
         }

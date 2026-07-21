@@ -180,3 +180,50 @@ No route files or duplication needed — the page is generated automatically.
 ## 📄 License
 
 MIT — free to use, modify and deploy.
+
+---
+
+## 🌐 Internationalization (i18n)
+
+CalcUtils ships a **client-side, zero-backend i18n system** so the entire UI can
+be switched to any of **18 world languages** from a single button in the header
+(globe icon). State is persisted in `localStorage` + a cookie, and `<html
+lang/dir>` flip instantly — including full **RTL** support for Arabic and
+Persian.
+
+### Coverage
+
+| Scope | Languages |
+| --- | --- |
+| Full UI shell (nav, footer, buttons, headings, breadcrumbs, ad labels, theme/lang controls) | **18** — en, ar, es, fr, de, pt, hi, zh, ru, ja, it, tr, nl, id, vi, pl, ko, fa |
+| Tool titles + descriptions | en, **ar**, es, fr, de, pt (6) |
+| Full tool content (intro / how-to / FAQ) | **ar** (Arabic) — every one of the 34 tools |
+
+Other languages translate the complete interface chrome and fall back to English
+for tool-specific copy. This is intentional and fully graceful — no broken strings.
+
+### How it works
+
+1. Every translatable element opts in with `data-i18n="key"` (and a `data-en`
+   English fallback). The language switcher writes `lang/dir` before first paint
+   via an inline no-flash script, so there is no RTL flash.
+2. `src/i18n/index.ts` scans the DOM, swaps text from bundled dictionaries, and
+   re-applies on every locale change (it also dispatches a
+   `calcutils:localechange` event tools can hook into).
+3. Dictionaries live in `src/i18n/ui.ts` (shell) and
+   `src/i18n/tool-translations.ts` (tool titles/descriptions/content).
+
+### Adding a language
+
+1. Add an entry to `LANGUAGES` in `src/i18n/config.ts`.
+2. Translate the UI keys in `src/i18n/ui.ts` under that locale's code.
+3. (Optional) Add tool titles/descriptions/content under the same code in
+   `src/i18n/tool-translations.ts`. Missing keys fall back to English.
+
+That's it — no build config, no backend, no route changes.
+
+### Dark mode
+
+A theme toggle (moon/sun) sits next to the language switcher. Preference is
+saved in `localStorage` + cookie and respects `prefers-color-scheme` on first
+visit. All colors are CSS variables, so light/dark is a single class flip.

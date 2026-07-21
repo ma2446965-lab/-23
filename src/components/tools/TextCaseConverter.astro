@@ -1,17 +1,17 @@
 <form id="tc-form" class="tool-form" novalidate>
   <div class="field"><label for="tc-in">Input text</label><textarea id="tc-in" class="input" spellcheck="false">The Quick Brown Fox Jumps Over The Lazy Dog</textarea></div>
   <div class="actions">
-    <button type="button" class="btn btn-ghost tc-btn" data-f="upper">UPPERCASE</button>
-    <button type="button" class="btn btn-ghost tc-btn" data-f="lower">lowercase</button>
-    <button type="button" class="btn btn-ghost tc-btn" data-f="title">Title Case</button>
-    <button type="button" class="btn btn-ghost tc-btn" data-f="sentence">Sentence case</button>
-    <button type="button" class="btn btn-ghost tc-btn" data-f="camel">camelCase</button>
-    <button type="button" class="btn btn-ghost tc-btn" data-f="snake">snake_case</button>
-    <button type="button" class="btn btn-ghost tc-btn" data-f="kebab">kebab-case</button>
-    <button type="button" class="btn btn-ghost tc-btn" data-f="alternating">aLtErNaTiNg</button>
+    <button type="button" class="btn btn-ghost tc-btn" data-f="toUpperCase">UPPERCASE</button>
+    <button type="button" class="btn btn-ghost tc-btn" data-f="toLowerCase">lowercase</button>
+    <button type="button" class="btn btn-ghost tc-btn" data-f="toTitleCase">Title Case</button>
+    <button type="button" class="btn btn-ghost tc-btn" data-f="toSentenceCase">Sentence case</button>
+    <button type="button" class="btn btn-ghost tc-btn" data-f="toCamelCase">camelCase</button>
+    <button type="button" class="btn btn-ghost tc-btn" data-f="toSnakeCase">snake_case</button>
+    <button type="button" class="btn btn-ghost tc-btn" data-f="toKebabCase">kebab-case</button>
+    <button type="button" class="btn btn-ghost tc-btn" data-f="toAlternatingCase">aLtErNaTiNg</button>
   </div>
   <div class="field"><label for="tc-out">Output</label><textarea id="tc-out" class="input" readonly spellcheck="false"></textarea></div>
-  <div class="actions"><button type="button" id="tc-copy" class="btn btn-ghost copy-btn">Copy</button></div>
+  <div class="actions"><button type="button" id="tc-copy" class="btn btn-ghost copy-btn" data-i18n="btn.copy">Copy</button></div>
 </form>
 
 <script>
@@ -38,5 +38,5 @@
       setTimeout(() => b && (b.textContent = 'Copy'), 1500);
     } catch {}
   });
-  apply('lower');
+  apply('toLowerCase');
 </script>

@@ -27,10 +27,16 @@ const {
 const path = Astro.url.pathname;
 const canonicalUrl = canonical ?? `${SITE.url}${path}`;
 const fullTitle = title === SITE.name ? title : `${title} | ${SITE.name}`;
+
+// SSR defaults to English/LTR; the inline head script swaps <html lang/dir>
+// from the visitor's saved locale before first paint (works on static hosts
+// because it reads the browser cookie/localStorage, not the request).
+const ssrLang = 'en';
+const ssrDir = 'ltr';
 ---
 
 <!doctype html>
-<html lang={SITE.lang}>
+<html lang={ssrLang} dir={ssrDir}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -38,6 +44,28 @@ const fullTitle = title === SITE.name ? title : `${title} | ${SITE.name}`;
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#4f46e5" />
     <meta name="generator" content={Astro.generator} />
+
+    {/* No-flash: set lang/dir/theme before first paint. */}
+    <script is:inline>
+      (function () {
+        function c(n) {
+          var m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)'));
+          return m ? decodeURIComponent(m[2]) : null;
+        }
+        var loc = c('calcutils:locale');
+        try { loc = loc || localStorage.getItem('calcutils:locale') || 'en'; } catch (e) {}
+        var rtl = { ar: 1, fa: 1, he: 1, ur: 1, yi: 1 };
+        document.documentElement.lang = loc || 'en';
+        document.documentElement.dir = rtl[loc] ? 'rtl' : 'ltr';
+        var th = c('calcutils:theme');
+        try { th = th || localStorage.getItem('calcutils:theme'); } catch (e) {}
+        var dark =
+          th === 'dark' ||
+          (!th && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      })();
+    </script>
+
     <SeoHead
       title={fullTitle}
       description={description}
@@ -50,6 +78,7 @@ const fullTitle = title === SITE.name ? title : `${title} | ${SITE.name}`;
     {
       ADSENSE_CLIENT && (
         <script
+          is:inline
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
           crossorigin="anonymous"
@@ -58,11 +87,17 @@ const fullTitle = title === SITE.name ? title : `${title} | ${SITE.name}`;
     }
   </head>
   <body>
-    <a href="#main" class="visually-hidden">Skip to content</a>
+    <a href="#main" class="skip-link">Skip to content</a>
     <Header />
     <main id="main">
       <slot />
     </main>
     <Footer />
+
+    {/* Client i18n engine: wires the language switcher + theme toggle and
+        applies translations on load and on every locale change. */}
+    <script>
+      import '../i18n/index';
+    </script>
   </body>
 </html>

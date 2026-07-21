@@ -15,7 +15,7 @@ const client = ADSENSE_CLIENT;
 {
   client ? (
     <div class={`ad-slot ${className}`}>
-      <span class="ad-label">{label}</span>
+      <span class="ad-label" data-i18n="tool.advertisement" data-en={label}>{label}</span>
       <ins
         class="adsbygoogle"
         style="display:block"
@@ -32,7 +32,7 @@ const client = ADSENSE_CLIENT;
   ) : (
     <div class={`ad-slot ${className}`} aria-hidden="true">
       <div class="ad-placeholder">
-        <span>{label}</span>
+        <span data-i18n="tool.advertisement" data-en={label}>{label}</span>
         <small>AdSense slot reserved — set PUBLIC_ADSENSE_CLIENT</small>
       </div>
     </div>

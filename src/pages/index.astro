@@ -13,9 +13,21 @@ const jsonLd = [websiteJsonLd()];
 <BaseLayout title={SITE.name} description={SITE.description} jsonLd={jsonLd}>
   <div class="container home">
     <section class="hero">
-      <h1>{SITE.tagline}</h1>
+      <span class="hero__eyebrow">⚡ {SITE.name} · 34+ Free Tools</span>
+      <h1>
+        <span class="gradient-text" data-i18n="footer.tagline" data-en={SITE.tagline}>{SITE.tagline}</span>
+      </h1>
       <p class="lead">{SITE.description}</p>
-      <a href="/calculators/" class="btn btn-primary">Browse all tools →</a>
+      <div class="hero__cta">
+        <a href="/calculators/" class="btn btn-primary" data-i18n="btn.browse" data-en="Browse all tools">
+          Browse all tools →
+        </a>
+      </div>
+      <div class="hero__stats">
+        <div><b>34</b> Free tools</div>
+        <div><b>18</b> Languages</div>
+        <div><b>100%</b> Client-side</div>
+      </div>
     </section>
 
     <AdSlot id="top" label="Advertisement" />
@@ -24,8 +36,11 @@ const jsonLd = [websiteJsonLd()];
       categories.map((cat) => (
         <section class="cat-section">
           <div class="cat-head">
-            <h2>{cat.icon} {cat.title}</h2>
-            <a href={`/${cat.slug}/`}>View all →</a>
+            <h2>
+              <span class="cat-icon" aria-hidden="true">{cat.icon}</span>{' '}
+              <span data-i18n={`cat.${cat.slug}`} data-en={cat.title}>{cat.title}</span>
+            </h2>
+            <a href={`/${cat.slug}/`} data-i18n="btn.viewAll" data-en="View all">View all →</a>
           </div>
           <RelatedTools tools={getToolsByCategory(cat.slug)} />
         </section>
@@ -35,38 +50,15 @@ const jsonLd = [websiteJsonLd()];
     <AdSlot id="inContent" label="Advertisement" />
 
     <section class="featured">
-      <h2>Popular tools</h2>
+      <h2 class="section-title" data-i18n="home.popular" data-en="Popular tools">Popular tools</h2>
       <RelatedTools tools={featured} />
     </section>
   </div>
 </BaseLayout>
 
 <style>
-  .home { padding-top: 1.5rem; padding-bottom: 2rem; }
-  .hero {
-    text-align: center;
-    padding: 2.5rem 1rem 2rem;
-  }
-  .hero h1 {
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    margin: 0 0 1rem;
-  }
-  .hero .lead {
-    font-size: 1.15rem;
-    color: var(--color-ink-600);
-    max-width: 60ch;
-    margin: 0 auto 1.5rem;
-  }
-  .cat-section { margin-top: 2.25rem; }
-  .cat-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--color-ink-200);
-    padding-bottom: 0.5rem;
-  }
-  .cat-head h2 { font-size: 1.5rem; margin: 0; }
-  .featured { margin-top: 2.5rem; }
-  .featured h2 { font-size: 1.5rem; }
+  .home { padding-top: 1rem; padding-bottom: 2rem; }
+  .hero__eyebrow { display: inline-flex; }
+  .cat-section { margin-top: 2.5rem; }
+  .featured { margin-top: 2.75rem; }
 </style>
